@@ -1,23 +1,32 @@
 version: '3.8'
 
 services:
-  # 1. Base de Datos Oracle
   oracle-db:
-    image: gvenzl/oracle-free:latest # Imagen ligera y optimizada de Oracle 23c
+    image: gvenzl/oracle-free:latest
     container_name: biblioteca-db
     environment:
-      - ORACLE_PASSWORD=Admin123Password # Cambia esto por algo seguro
-      - APP_USER=biblioteca_user
-      - APP_PASSWORD=biblioteca_pass
+      - ORACLE_PASSWORD=Admin123Password
     ports:
       - "1521:1521"
     volumes:
-      - oracle_data:/opt/oracle/oradata
-      # Este volumen ejecuta el script init.sql automáticamente al arrancar por primera vez
-      - ./database/init.sql:/container-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
+      - ./database/db.sql:/docker-entrypoint-initdb.d/db.sql
 
-  # 2. Tu Microservicio BFF
+  function-usuarios:
+    build: 
+      context: ./function-usuarios
+      dockerfile: Dockerfile
+    container_name: fn-usuarios
+    ports:
+      - "8081:80" # El contenedor expone el 80, tu PC usa el 8081
+
+  function-prestamos:
+    build: 
+      context: ./function-prestamos
+      dockerfile: Dockerfile
+    container_name: fn-prestamos
+    ports:
+      - "8082:80"
+
   bff-service:
     build: 
       context: ./bff-service
@@ -26,11 +35,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Aquí defines las URLs de tus funciones Serverless. 
-      # Cuando subas a Docker Lab, solo cambias estas URLs.
-      - URL_FUNCION_USUARIOS=http://tu-funcion-usuarios-url
-      - URL_FUNCION_PRESTAMOS=http://tu-funcion-prestamos-url
-    restart: unless-stopped
-
-volumes:
-  oracle_data:
+      # ¡OJO AQUÍ! Como están en la misma red de Docker, 
+      # el BFF llama a las funciones por su nombre de contenedor
+      - URL_FUNCION_USUARIOS=http://function-usuarios:80
+      - URL_FUNCION_PRESTAMOS=http://function-prestamos:80
+    depends_on:
+      - function-usuarios
+      - function-prestamos
