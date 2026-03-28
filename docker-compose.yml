@@ -1,10 +1,7 @@
-version: '3.8'
-
 services:
   oracle-db:
     image: gvenzl/oracle-free:slim
     container_name: biblioteca-db
-    platform: linux/amd64
     environment:
       - ORACLE_PASSWORD=Admin123Password
     ports:
