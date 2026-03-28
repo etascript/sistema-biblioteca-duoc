@@ -2,28 +2,38 @@ version: '3.8'
 
 services:
   oracle-db:
-    image: gvenzl/oracle-free:latest
+    image: gvenzl/oracle-free:slim
     container_name: biblioteca-db
+    platform: linux/amd64
     environment:
       - ORACLE_PASSWORD=Admin123Password
     ports:
       - "1521:1521"
     volumes:
-      - ./database/db.sql:/docker-entrypoint-initdb.d/db.sql
+      - oracle-data:/opt/oracle/oradata
+      - ./database/db.sql:/container-entrypoint-initdb.d/db.sql
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
 
   bff-service:
-    build: 
+    build:
       context: ./bff-service
       dockerfile: Dockerfile
     container_name: biblioteca-bff
     ports:
       - "8080:8080"
     environment:
-      # ¡AQUÍ VAN TUS URLS DE AZURE! 
-      # Reemplaza estas de ejemplo por las tuyas reales
       - URL_FUNCION_USUARIOS=https://biblio-users-g11.azurewebsites.net/api/usuarios
       - URL_FUNCION_PRESTAMOS=https://biblio-prestamos-g11.azurewebsites.net/api/prestamos
     depends_on:
-      - oracle-db
+      oracle-db:
+        condition: service_healthy
     restart: unless-stopped
+
+volumes:
+  oracle-data:
