@@ -1,4 +1,7 @@
--- Script de Creación de Tablas para Sistema de Biblioteca (Oracle)
+-- Script de Creacion de Tablas para Sistema de Biblioteca (Oracle)
+
+-- Conectar al PDB donde las Azure Functions consultaran
+ALTER SESSION SET CONTAINER = XEPDB1;
 
 -- 1. Tabla de Usuarios
 CREATE TABLE usuarios (

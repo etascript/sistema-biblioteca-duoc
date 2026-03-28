@@ -1,6 +1,6 @@
 {
   "scriptFile" : "../function-prestamos-1.0-SNAPSHOT.jar",
-  "entryPoint" : "main.java.com.function.PrestamoFunction.crearPrestamo",
+  "entryPoint" : "com.function.PrestamoFunction.crearPrestamo",
   "bindings" : [ {
     "type" : "httpTrigger",
     "direction" : "in",

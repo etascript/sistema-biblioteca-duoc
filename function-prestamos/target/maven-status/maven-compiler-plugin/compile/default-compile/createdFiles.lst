@@ -1,2 +1,3 @@
-main\java\com\function\LibroFunction.class
-main\java\com\function\PrestamoFunction.class
+com\function\DatabaseHelper.class
+com\function\LibroFunction.class
+com\function\PrestamoFunction.class

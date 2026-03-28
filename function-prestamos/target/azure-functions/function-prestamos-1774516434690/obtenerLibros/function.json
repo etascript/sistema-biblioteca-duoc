@@ -1,6 +1,6 @@
 {
   "scriptFile" : "../function-prestamos-1.0-SNAPSHOT.jar",
-  "entryPoint" : "main.java.com.function.LibroFunction.getLibros",
+  "entryPoint" : "com.function.LibroFunction.getLibros",
   "bindings" : [ {
     "type" : "httpTrigger",
     "direction" : "in",
