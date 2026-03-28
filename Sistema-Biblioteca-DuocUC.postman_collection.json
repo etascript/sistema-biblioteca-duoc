@@ -1,0 +1,179 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Sistema Biblioteca DuocUC",
+		"description": "Coleccion de endpoints para el sistema de biblioteca. BFF Service y Azure Functions.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "BFF_URL",
+			"value": "http://100.23.191.203:8080"
+		},
+		{
+			"key": "AZ_USUARIOS_URL",
+			"value": "https://biblio-users-g11.azurewebsites.net"
+		},
+		{
+			"key": "AZ_PRESTAMOS_URL",
+			"value": "https://biblio-prestamos-g11.azurewebsites.net"
+		}
+	],
+	"item": [
+		{
+			"name": "BFF - Usuarios",
+			"item": [
+				{
+					"name": "Listar Usuarios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BFF_URL}}/api/bff/usuarios",
+							"host": ["{{BFF_URL}}"],
+							"path": ["api", "bff", "usuarios"]
+						}
+					}
+				},
+				{
+					"name": "Crear Usuario",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\": \"Maria Lopez\",\n    \"email\": \"maria.lopez@duocuc.cl\"\n}"
+						},
+						"url": {
+							"raw": "{{BFF_URL}}/api/bff/usuarios",
+							"host": ["{{BFF_URL}}"],
+							"path": ["api", "bff", "usuarios"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "BFF - Libros",
+			"item": [
+				{
+					"name": "Listar Libros",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BFF_URL}}/api/bff/libros",
+							"host": ["{{BFF_URL}}"],
+							"path": ["api", "bff", "libros"]
+						}
+					}
+				},
+				{
+					"name": "Crear Libro",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titulo\": \"Cien Anos de Soledad\",\n    \"autor\": \"Gabriel Garcia Marquez\"\n}"
+						},
+						"url": {
+							"raw": "{{BFF_URL}}/api/bff/libros",
+							"host": ["{{BFF_URL}}"],
+							"path": ["api", "bff", "libros"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "BFF - Prestamos",
+			"item": [
+				{
+					"name": "Listar Prestamos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BFF_URL}}/api/bff/prestamos",
+							"host": ["{{BFF_URL}}"],
+							"path": ["api", "bff", "prestamos"]
+						}
+					}
+				},
+				{
+					"name": "Crear Prestamo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"idUsuario\": 1,\n    \"idLibro\": 1\n}"
+						},
+						"url": {
+							"raw": "{{BFF_URL}}/api/bff/prestamos",
+							"host": ["{{BFF_URL}}"],
+							"path": ["api", "bff", "prestamos"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Azure Fn - Directas",
+			"item": [
+				{
+					"name": "Obtener Usuarios (directo)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{AZ_USUARIOS_URL}}/api/usuarios",
+							"host": ["{{AZ_USUARIOS_URL}}"],
+							"path": ["api", "usuarios"]
+						}
+					}
+				},
+				{
+					"name": "Obtener Libros (directo)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{AZ_PRESTAMOS_URL}}/api/libros",
+							"host": ["{{AZ_PRESTAMOS_URL}}"],
+							"path": ["api", "libros"]
+						}
+					}
+				},
+				{
+					"name": "Obtener Prestamos (directo)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{AZ_PRESTAMOS_URL}}/api/prestamos",
+							"host": ["{{AZ_PRESTAMOS_URL}}"],
+							"path": ["api", "prestamos"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

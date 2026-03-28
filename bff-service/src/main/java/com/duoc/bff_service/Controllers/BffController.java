@@ -14,15 +14,36 @@ public class BffController {
         this.bffService = bffService;
     }
 
-    // Endpoint: GET /api/bff/usuarios
+    // --- Usuarios ---
     @GetMapping("/usuarios")
     public ResponseEntity<Object> listarUsuarios() {
         return ResponseEntity.ok(bffService.getUsuarios());
     }
 
-    // Endpoint: GET /api/bff/prestamos
+    @PostMapping("/usuarios")
+    public ResponseEntity<Object> crearUsuario(@RequestBody Object body) {
+        return ResponseEntity.status(201).body(bffService.crearUsuario(body));
+    }
+
+    // --- Libros ---
+    @GetMapping("/libros")
+    public ResponseEntity<Object> listarLibros() {
+        return ResponseEntity.ok(bffService.getLibros());
+    }
+
+    @PostMapping("/libros")
+    public ResponseEntity<Object> crearLibro(@RequestBody Object body) {
+        return ResponseEntity.status(201).body(bffService.crearLibro(body));
+    }
+
+    // --- Prestamos ---
     @GetMapping("/prestamos")
     public ResponseEntity<Object> listarPrestamos() {
         return ResponseEntity.ok(bffService.getPrestamos());
+    }
+
+    @PostMapping("/prestamos")
+    public ResponseEntity<Object> crearPrestamo(@RequestBody Object body) {
+        return ResponseEntity.status(201).body(bffService.crearPrestamo(body));
     }
 }
