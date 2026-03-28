@@ -1,0 +1,16 @@
+{
+  "scriptFile" : "../usuarios-1.0-SNAPSHOT.jar",
+  "entryPoint" : "main.java.com.function.UsuarioFunction.getUsuarios",
+  "bindings" : [ {
+    "type" : "httpTrigger",
+    "direction" : "in",
+    "name" : "req",
+    "route" : "usuarios",
+    "methods" : [ "GET" ],
+    "authLevel" : "ANONYMOUS"
+  }, {
+    "type" : "http",
+    "direction" : "out",
+    "name" : "$return"
+  } ]
+}

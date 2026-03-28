@@ -1,0 +1,16 @@
+{
+  "scriptFile" : "../function-prestamos-1.0-SNAPSHOT.jar",
+  "entryPoint" : "main.java.com.function.PrestamoFunction.crearPrestamo",
+  "bindings" : [ {
+    "type" : "httpTrigger",
+    "direction" : "in",
+    "name" : "req",
+    "route" : "prestamos",
+    "methods" : [ "POST" ],
+    "authLevel" : "ANONYMOUS"
+  }, {
+    "type" : "http",
+    "direction" : "out",
+    "name" : "$return"
+  } ]
+}

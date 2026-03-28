@@ -10,22 +10,7 @@ services:
       - "1521:1521"
     volumes:
       - ./database/db.sql:/docker-entrypoint-initdb.d/db.sql
-
-  function-usuarios:
-    build: 
-      context: ./function-usuarios
-      dockerfile: Dockerfile
-    container_name: fn-usuarios
-    ports:
-      - "8081:80" # El contenedor expone el 80, tu PC usa el 8081
-
-  function-prestamos:
-    build: 
-      context: ./function-prestamos
-      dockerfile: Dockerfile
-    container_name: fn-prestamos
-    ports:
-      - "8082:80"
+    restart: unless-stopped
 
   bff-service:
     build: 
@@ -35,10 +20,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # ¡OJO AQUÍ! Como están en la misma red de Docker, 
-      # el BFF llama a las funciones por su nombre de contenedor
-      - URL_FUNCION_USUARIOS=http://function-usuarios:80
-      - URL_FUNCION_PRESTAMOS=http://function-prestamos:80
+      # ¡AQUÍ VAN TUS URLS DE AZURE! 
+      # Reemplaza estas de ejemplo por las tuyas reales
+      - URL_FUNCION_USUARIOS=https://biblio-users-g11.azurewebsites.net/api/usuarios
+      - URL_FUNCION_PRESTAMOS=https://biblio-prestamos-g11.azurewebsites.net/api/prestamos
     depends_on:
-      - function-usuarios
-      - function-prestamos
+      - oracle-db
+    restart: unless-stopped

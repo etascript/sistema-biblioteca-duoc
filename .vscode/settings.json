@@ -5,5 +5,6 @@
     "azureFunctions.projectLanguage": "Java",
     "azureFunctions.projectRuntime": "~4",
     "azureFunctions.preDeployTask": "package (functions)",
-    "azureFunctions.templateFilter": "Verified"
+    "azureFunctions.templateFilter": "Verified",
+    "azureFunctions.projectSubpath": "function-usuarios"
 }
