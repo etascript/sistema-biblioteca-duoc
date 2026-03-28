@@ -1,6 +1,6 @@
 services:
   oracle-db:
-    image: gvenzl/oracle-free:slim
+    image: gvenzl/oracle-xe:21-slim
     container_name: biblioteca-db
     environment:
       - ORACLE_PASSWORD=Admin123Password
