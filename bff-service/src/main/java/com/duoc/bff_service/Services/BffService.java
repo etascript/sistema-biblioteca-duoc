@@ -24,15 +24,11 @@ public class BffService {
 
     // Ejemplo: Orquestar llamada para obtener usuarios
     public Object getUsuarios() {
-        // Llama a la función serverless de usuarios y devuelve la respuesta JSON tal cual
-        String endpoint = usuariosUrl + "/api/usuarios";
-        return restTemplate.getForObject(endpoint, Object.class);
+        return restTemplate.getForObject(usuariosUrl, Object.class);
     }
 
-    // Ejemplo: Orquestar llamada para obtener préstamos
     public Object getPrestamos() {
-        String endpoint = prestamosUrl + "/api/prestamos";
-        return restTemplate.getForObject(endpoint, Object.class);
+        return restTemplate.getForObject(prestamosUrl, Object.class);
     }
     
     // Aquí agregarías los métodos para POST, PUT, DELETE (Crear, Actualizar, Borrar)
