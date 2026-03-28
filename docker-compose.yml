@@ -4,6 +4,8 @@ services:
     container_name: biblioteca-db
     environment:
       - ORACLE_PASSWORD=Admin123Password
+      - APP_USER=biblioteca
+      - APP_USER_PASSWORD=Biblioteca123
     ports:
       - "1521:1521"
     volumes:

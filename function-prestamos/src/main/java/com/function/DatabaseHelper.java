@@ -12,11 +12,11 @@ public class DatabaseHelper {
 
     private static final String DB_USER = System.getenv("ORACLE_DB_USER") != null
             ? System.getenv("ORACLE_DB_USER")
-            : "SYSTEM";
+            : "biblioteca";
 
     private static final String DB_PASSWORD = System.getenv("ORACLE_DB_PASSWORD") != null
             ? System.getenv("ORACLE_DB_PASSWORD")
-            : "Admin123Password";
+            : "Biblioteca123";
 
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
