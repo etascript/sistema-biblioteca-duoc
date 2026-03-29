@@ -1,27 +1,31 @@
 {
 	"info": {
-		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"_postman_id": "b1b2c3d4-e5f6-7890-abcd-ef1234567890",
 		"name": "Sistema Biblioteca DuocUC",
-		"description": "Coleccion de endpoints para el sistema de biblioteca. BFF Service y Azure Functions.",
+		"description": "Coleccion completa de endpoints para el Sistema de Biblioteca DuocUC.\nIncluye BFF Service (EC2) y llamadas directas a Azure Functions.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
 		{
 			"key": "BFF_URL",
-			"value": "http://100.23.191.203:8080"
+			"value": "http://100.23.191.203:8080",
+			"description": "IP Elastica EC2 - BFF Spring Boot"
 		},
 		{
 			"key": "AZ_USUARIOS_URL",
-			"value": "https://biblio-users-g11.azurewebsites.net"
+			"value": "https://biblio-users-g11.azurewebsites.net",
+			"description": "Azure Function App - Usuarios"
 		},
 		{
 			"key": "AZ_PRESTAMOS_URL",
-			"value": "https://biblio-prestamos-g11.azurewebsites.net"
+			"value": "https://biblio-prestamos-g11.azurewebsites.net",
+			"description": "Azure Function App - Prestamos y Libros"
 		}
 	],
 	"item": [
 		{
 			"name": "BFF - Usuarios",
+			"description": "Operaciones de usuarios a traves del BFF (EC2 -> Azure Fn)",
 			"item": [
 				{
 					"name": "Listar Usuarios",
@@ -32,7 +36,8 @@
 							"raw": "{{BFF_URL}}/api/bff/usuarios",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "usuarios"]
-						}
+						},
+						"description": "Obtiene todos los usuarios registrados en la base de datos Oracle."
 					}
 				},
 				{
@@ -53,13 +58,15 @@
 							"raw": "{{BFF_URL}}/api/bff/usuarios",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "usuarios"]
-						}
+						},
+						"description": "Crea un nuevo usuario. Campos obligatorios: nombre, email."
 					}
 				}
 			]
 		},
 		{
 			"name": "BFF - Libros",
+			"description": "Operaciones de libros a traves del BFF (EC2 -> Azure Fn)",
 			"item": [
 				{
 					"name": "Listar Libros",
@@ -70,7 +77,8 @@
 							"raw": "{{BFF_URL}}/api/bff/libros",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "libros"]
-						}
+						},
+						"description": "Obtiene el catalogo completo de libros con su estado de disponibilidad."
 					}
 				},
 				{
@@ -91,13 +99,15 @@
 							"raw": "{{BFF_URL}}/api/bff/libros",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "libros"]
-						}
+						},
+						"description": "Registra un nuevo libro en el catalogo. Campos obligatorios: titulo, autor."
 					}
 				}
 			]
 		},
 		{
 			"name": "BFF - Prestamos",
+			"description": "Operaciones de prestamos a traves del BFF (EC2 -> Azure Fn)",
 			"item": [
 				{
 					"name": "Listar Prestamos",
@@ -108,7 +118,8 @@
 							"raw": "{{BFF_URL}}/api/bff/prestamos",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "prestamos"]
-						}
+						},
+						"description": "Obtiene todos los prestamos con datos del usuario y libro asociado."
 					}
 				},
 				{
@@ -129,16 +140,18 @@
 							"raw": "{{BFF_URL}}/api/bff/prestamos",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "prestamos"]
-						}
+						},
+						"description": "Crea un prestamo. Valida que el libro exista y este disponible. Campos: idUsuario, idLibro."
 					}
 				}
 			]
 		},
 		{
-			"name": "Azure Fn - Directas",
+			"name": "Azure Fn - Directas (Usuarios)",
+			"description": "Llamadas directas a la Azure Function de Usuarios (sin pasar por BFF)",
 			"item": [
 				{
-					"name": "Obtener Usuarios (directo)",
+					"name": "Listar Usuarios (directo)",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -150,7 +163,34 @@
 					}
 				},
 				{
-					"name": "Obtener Libros (directo)",
+					"name": "Crear Usuario (directo)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\": \"Pedro Soto\",\n    \"email\": \"pedro.soto@duocuc.cl\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_USUARIOS_URL}}/api/usuarios",
+							"host": ["{{AZ_USUARIOS_URL}}"],
+							"path": ["api", "usuarios"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Azure Fn - Directas (Libros y Prestamos)",
+			"description": "Llamadas directas a la Azure Function de Prestamos/Libros (sin pasar por BFF)",
+			"item": [
+				{
+					"name": "Listar Libros (directo)",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -162,10 +202,52 @@
 					}
 				},
 				{
-					"name": "Obtener Prestamos (directo)",
+					"name": "Crear Libro (directo)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"titulo\": \"La Casa de los Espiritus\",\n    \"autor\": \"Isabel Allende\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_PRESTAMOS_URL}}/api/libros",
+							"host": ["{{AZ_PRESTAMOS_URL}}"],
+							"path": ["api", "libros"]
+						}
+					}
+				},
+				{
+					"name": "Listar Prestamos (directo)",
 					"request": {
 						"method": "GET",
 						"header": [],
+						"url": {
+							"raw": "{{AZ_PRESTAMOS_URL}}/api/prestamos",
+							"host": ["{{AZ_PRESTAMOS_URL}}"],
+							"path": ["api", "prestamos"]
+						}
+					}
+				},
+				{
+					"name": "Crear Prestamo (directo)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"idUsuario\": 1,\n    \"idLibro\": 1\n}"
+						},
 						"url": {
 							"raw": "{{AZ_PRESTAMOS_URL}}/api/prestamos",
 							"host": ["{{AZ_PRESTAMOS_URL}}"],
