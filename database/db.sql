@@ -55,11 +55,15 @@ INSERT INTO categorias (nombre, descripcion) VALUES ('Novela', 'Ficcion narrativ
 INSERT INTO categorias (nombre, descripcion) VALUES ('Historia', 'Obras historicas y cronicas');
 
 INSERT INTO usuarios (nombre, email) VALUES ('Sebastian Cortes', 'seba.cortesp@duocuc.cl');
+INSERT INTO usuarios (nombre, email) VALUES ('Nataniel Soto', 'nataniel.soto@duocuc.cl');
 
 INSERT INTO libros (titulo, autor, id_categoria) VALUES ('Hijo de Ladron', 'Manuel Rojas', 1);
 INSERT INTO libros (titulo, autor, id_categoria) VALUES ('Cien Anos de Soledad', 'Gabriel Garcia Marquez', 2);
+INSERT INTO libros (titulo, autor, id_categoria) VALUES ('Historia de Chile', 'Jorge Pinto', 3);
 
 INSERT INTO resenas (id_usuario, id_libro, calificacion, comentario)
 VALUES (1, 1, 5, 'Obra imprescindible de la literatura chilena');
+INSERT INTO resenas (id_usuario, id_libro, calificacion, comentario)
+VALUES (2, 2, 4, 'Una obra maestra de la ficción latinoamericana');
 
 COMMIT;
