@@ -1,14 +1,14 @@
 {
 	"info": {
-		"_postman_id": "b1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"_postman_id": "c1b2c3d4-e5f6-7890-abcd-ef1234567890",
 		"name": "Sistema Biblioteca DuocUC",
-		"description": "Coleccion completa de endpoints para el Sistema de Biblioteca DuocUC.\nIncluye BFF Service (EC2) y llamadas directas a Azure Functions.",
+		"description": "Coleccion completa: BFF REST, Azure Functions REST y Azure Functions GraphQL.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
 		{
 			"key": "BFF_URL",
-			"value": "http://100.23.191.203:8080",
+			"value": "http://44.233.50.94:8080",
 			"description": "IP Elastica EC2 - BFF Spring Boot"
 		},
 		{
@@ -20,12 +20,21 @@
 			"key": "AZ_PRESTAMOS_URL",
 			"value": "https://biblio-prestamos-g11.azurewebsites.net",
 			"description": "Azure Function App - Prestamos y Libros"
+		},
+		{
+			"key": "AZ_GQL_CONSULTAS_URL",
+			"value": "http://localhost:8081",
+			"description": "GraphQL Consultas - Docker local (puerto 8081)"
+		},
+		{
+			"key": "AZ_GQL_OPERACIONES_URL",
+			"value": "http://localhost:8082",
+			"description": "GraphQL Operaciones - Docker local (puerto 8082)"
 		}
 	],
 	"item": [
 		{
 			"name": "BFF - Usuarios",
-			"description": "Operaciones de usuarios a traves del BFF (EC2 -> Azure Fn)",
 			"item": [
 				{
 					"name": "Listar Usuarios",
@@ -36,20 +45,14 @@
 							"raw": "{{BFF_URL}}/api/bff/usuarios",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "usuarios"]
-						},
-						"description": "Obtiene todos los usuarios registrados en la base de datos Oracle."
+						}
 					}
 				},
 				{
 					"name": "Crear Usuario",
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
+						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"nombre\": \"Maria Lopez\",\n    \"email\": \"maria.lopez@duocuc.cl\"\n}"
@@ -58,15 +61,13 @@
 							"raw": "{{BFF_URL}}/api/bff/usuarios",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "usuarios"]
-						},
-						"description": "Crea un nuevo usuario. Campos obligatorios: nombre, email."
+						}
 					}
 				}
 			]
 		},
 		{
 			"name": "BFF - Libros",
-			"description": "Operaciones de libros a traves del BFF (EC2 -> Azure Fn)",
 			"item": [
 				{
 					"name": "Listar Libros",
@@ -77,37 +78,29 @@
 							"raw": "{{BFF_URL}}/api/bff/libros",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "libros"]
-						},
-						"description": "Obtiene el catalogo completo de libros con su estado de disponibilidad."
+						}
 					}
 				},
 				{
 					"name": "Crear Libro",
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
+						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"titulo\": \"Cien Anos de Soledad\",\n    \"autor\": \"Gabriel Garcia Marquez\"\n}"
+							"raw": "{\n    \"titulo\": \"La Casa de los Espiritus\",\n    \"autor\": \"Isabel Allende\"\n}"
 						},
 						"url": {
 							"raw": "{{BFF_URL}}/api/bff/libros",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "libros"]
-						},
-						"description": "Registra un nuevo libro en el catalogo. Campos obligatorios: titulo, autor."
+						}
 					}
 				}
 			]
 		},
 		{
 			"name": "BFF - Prestamos",
-			"description": "Operaciones de prestamos a traves del BFF (EC2 -> Azure Fn)",
 			"item": [
 				{
 					"name": "Listar Prestamos",
@@ -118,20 +111,14 @@
 							"raw": "{{BFF_URL}}/api/bff/prestamos",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "prestamos"]
-						},
-						"description": "Obtiene todos los prestamos con datos del usuario y libro asociado."
+						}
 					}
 				},
 				{
 					"name": "Crear Prestamo",
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
+						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"idUsuario\": 1,\n    \"idLibro\": 1\n}"
@@ -140,18 +127,220 @@
 							"raw": "{{BFF_URL}}/api/bff/prestamos",
 							"host": ["{{BFF_URL}}"],
 							"path": ["api", "bff", "prestamos"]
-						},
-						"description": "Crea un prestamo. Valida que el libro exista y este disponible. Campos: idUsuario, idLibro."
+						}
 					}
 				}
 			]
 		},
 		{
-			"name": "Azure Fn - Directas (Usuarios)",
-			"description": "Llamadas directas a la Azure Function de Usuarios (sin pasar por BFF)",
+			"name": "GraphQL - Consultas (Queries)",
+			"description": "Consultas complejas via GraphQL. Endpoint: POST /api/graphql/consultas",
 			"item": [
 				{
-					"name": "Listar Usuarios (directo)",
+					"name": "Todos los Usuarios",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"{ usuarios { idUsuario nombre email fechaRegistro } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
+							"path": ["api", "graphql", "consultas"]
+						}
+					}
+				},
+				{
+					"name": "Usuario con sus Prestamos",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"{ usuario(id: 1) { idUsuario nombre email prestamos { idPrestamo tituloLibro fechaPrestamo estado } } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
+							"path": ["api", "graphql", "consultas"]
+						}
+					}
+				},
+				{
+					"name": "Todos los Libros con Categoria y Resenas",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"{ libros { idLibro titulo autor disponible categoria { nombre } resenas { calificacion comentario nombreUsuario } } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
+							"path": ["api", "graphql", "consultas"]
+						}
+					}
+				},
+				{
+					"name": "Libro por ID",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"{ libro(id: 1) { idLibro titulo autor disponible categoria { nombre descripcion } resenas { nombreUsuario calificacion comentario fecha } } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
+							"path": ["api", "graphql", "consultas"]
+						}
+					}
+				},
+				{
+					"name": "Todas las Categorias",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"{ categorias { idCategoria nombre descripcion } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
+							"path": ["api", "graphql", "consultas"]
+						}
+					}
+				},
+				{
+					"name": "Libros por Categoria",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"{ librosPorCategoria(idCategoria: 1) { idLibro titulo autor disponible } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
+							"path": ["api", "graphql", "consultas"]
+						}
+					}
+				},
+				{
+					"name": "Prestamos por Usuario",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"{ prestamosPorUsuario(idUsuario: 1) { idPrestamo tituloLibro fechaPrestamo fechaDevolucion estado } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
+							"path": ["api", "graphql", "consultas"]
+						}
+					}
+				},
+				{
+					"name": "Resenas por Libro",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"{ resenasPorLibro(idLibro: 1) { idResena nombreUsuario calificacion comentario fecha } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
+							"path": ["api", "graphql", "consultas"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "GraphQL - Operaciones (Mutations)",
+			"description": "Mutaciones via GraphQL. Endpoint: POST /api/graphql/operaciones",
+			"item": [
+				{
+					"name": "Crear Categoria",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"mutation { crearCategoria(nombre: \\\"Ciencia Ficcion\\\", descripcion: \\\"Obras de ciencia ficcion y fantasia\\\") { idCategoria nombre descripcion } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
+							"host": ["{{AZ_GQL_OPERACIONES_URL}}"],
+							"path": ["api", "graphql", "operaciones"]
+						}
+					}
+				},
+				{
+					"name": "Asignar Categoria a Libro",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"mutation { asignarCategoria(idLibro: 1, idCategoria: 1) { idLibro titulo autor } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
+							"host": ["{{AZ_GQL_OPERACIONES_URL}}"],
+							"path": ["api", "graphql", "operaciones"]
+						}
+					}
+				},
+				{
+					"name": "Crear Resena",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"mutation { crearResena(idUsuario: 1, idLibro: 1, calificacion: 5, comentario: \\\"Excelente lectura\\\") { idResena calificacion comentario fecha } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
+							"host": ["{{AZ_GQL_OPERACIONES_URL}}"],
+							"path": ["api", "graphql", "operaciones"]
+						}
+					}
+				},
+				{
+					"name": "Devolver Libro",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"mutation { devolverLibro(idPrestamo: 1) { idPrestamo estado fechaDevolucion } }\"\n}"
+						},
+						"url": {
+							"raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
+							"host": ["{{AZ_GQL_OPERACIONES_URL}}"],
+							"path": ["api", "graphql", "operaciones"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Azure Fn - REST Directas",
+			"item": [
+				{
+					"name": "Obtener Usuarios (directo)",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -166,12 +355,7 @@
 					"name": "Crear Usuario (directo)",
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
+						"header": [{"key": "Content-Type", "value": "application/json"}],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"nombre\": \"Pedro Soto\",\n    \"email\": \"pedro.soto@duocuc.cl\"\n}"
@@ -182,15 +366,9 @@
 							"path": ["api", "usuarios"]
 						}
 					}
-				}
-			]
-		},
-		{
-			"name": "Azure Fn - Directas (Libros y Prestamos)",
-			"description": "Llamadas directas a la Azure Function de Prestamos/Libros (sin pasar por BFF)",
-			"item": [
+				},
 				{
-					"name": "Listar Libros (directo)",
+					"name": "Obtener Libros (directo)",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -202,52 +380,10 @@
 					}
 				},
 				{
-					"name": "Crear Libro (directo)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"titulo\": \"La Casa de los Espiritus\",\n    \"autor\": \"Isabel Allende\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_PRESTAMOS_URL}}/api/libros",
-							"host": ["{{AZ_PRESTAMOS_URL}}"],
-							"path": ["api", "libros"]
-						}
-					}
-				},
-				{
-					"name": "Listar Prestamos (directo)",
+					"name": "Obtener Prestamos (directo)",
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "{{AZ_PRESTAMOS_URL}}/api/prestamos",
-							"host": ["{{AZ_PRESTAMOS_URL}}"],
-							"path": ["api", "prestamos"]
-						}
-					}
-				},
-				{
-					"name": "Crear Prestamo (directo)",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"idUsuario\": 1,\n    \"idLibro\": 1\n}"
-						},
 						"url": {
 							"raw": "{{AZ_PRESTAMOS_URL}}/api/prestamos",
 							"host": ["{{AZ_PRESTAMOS_URL}}"],

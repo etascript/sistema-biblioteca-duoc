@@ -1,6 +1,6 @@
 # Sistema de Biblioteca - DuocUC
 
-Sistema de gestion de biblioteca basado en una arquitectura de microservicios cloud, utilizando un BFF (Backend For Frontend) desplegado en AWS EC2 que orquesta llamadas a Azure Functions serverless, respaldadas por una base de datos Oracle.
+Sistema de gestion de biblioteca basado en una arquitectura de microservicios cloud, con un BFF en AWS EC2 que orquesta llamadas a cuatro Azure Functions serverless, respaldadas por una base de datos Oracle.
 
 ## Arquitectura
 
@@ -8,73 +8,59 @@ Sistema de gestion de biblioteca basado en una arquitectura de microservicios cl
 Cliente (Postman / Frontend)
         |
         v
-+------------------+        +----------------------------+
-| BFF Service      |  --->  | Azure Fn - Usuarios        |
-| (Spring Boot)    |        | biblio-users-g11            |
-| EC2 :8080        |  --->  +----------------------------+
-|                  |        | Azure Fn - Prestamos/Libros |
-+------------------+        | biblio-prestamos-g11        |
-        |                   +----------------------------+
-        |                               |
-+------------------+                    |
-| Oracle XE 21c   | <------------------+
-| EC2 Docker :1521 |
 +------------------+
+| BFF Service      |  Spring Boot 3.4.3 - Java 21
+| EC2 :8080        |
++------------------+
+        |
+        +---> Azure Fn Usuarios        (REST)     biblio-users-g11
+        +---> Azure Fn Prestamos/Libros(REST)     biblio-prestamos-g11
+        |
+        |     (llamadas directas del cliente)
+        +---> Azure Fn GraphQL Consultas          biblio-graphql-consultas-g11
+        +---> Azure Fn GraphQL Operaciones        biblio-graphql-operaciones-g11
+                                |
+                                v
+                    +------------------+
+                    | Oracle XE 21c    |
+                    | EC2 Docker :1521 |
+                    +------------------+
 ```
-
-- **BFF Service**: Spring Boot 3.4.3 (Java 21) corriendo en Docker sobre EC2. Actua como punto unico de entrada para el cliente.
-- **Azure Functions**: Dos Function Apps serverless en Java 21 que contienen la logica de negocio y se conectan a la base de datos.
-- **Oracle XE 21c**: Base de datos relacional corriendo en Docker sobre la misma EC2.
 
 ## Estructura del Proyecto
 
 ```
 sistema-biblioteca-duoc/
-|-- bff-service/                  # BFF Spring Boot (Docker - EC2)
-|   |-- src/main/java/com/duoc/bff_service/
-|   |   |-- Controllers/BffController.java
-|   |   |-- Services/BffService.java
-|   |-- Dockerfile
-|   |-- pom.xml
-|
-|-- function-usuarios/            # Azure Function - Usuarios
-|   |-- src/main/java/com/function/
-|   |   |-- UsuarioFunction.java
-|   |   |-- DatabaseHelper.java
-|   |-- pom.xml
-|
-|-- function-prestamos/           # Azure Function - Prestamos y Libros
-|   |-- src/main/java/com/function/
-|   |   |-- PrestamoFunction.java
-|   |   |-- LibroFunction.java
-|   |   |-- DatabaseHelper.java
-|   |-- pom.xml
-|
+|-- bff-service/                        # BFF REST - Spring Boot (Docker EC2)
+|-- function-usuarios/                  # Azure Fn REST - CRUD Usuarios
+|-- function-prestamos/                 # Azure Fn REST - Libros y Prestamos
+|-- function-graphql-consultas/         # Azure Fn GraphQL - Queries
+|-- function-graphql-operaciones/       # Azure Fn GraphQL - Mutations
 |-- database/
-|   |-- db.sql                    # Script DDL (tablas + datos de prueba)
-|   |-- init.sh                   # Script de inicializacion Oracle
-|
-|-- docker-compose.yml            # Orquestacion de contenedores
+|   |-- db.sql                          # DDL completo (5 tablas + datos prueba)
+|   |-- init.sh                         # Script inicializacion Oracle Docker
+|   |-- migration_graphql.sql           # Migracion para DB ya existente
+|-- docker-compose.yml
 |-- Sistema-Biblioteca-DuocUC.postman_collection.json
 ```
 
-## Base de Datos
-
-Oracle XE 21c con 3 tablas en el PDB `XEPDB1`:
+## Base de Datos (Oracle XE 21c - XEPDB1)
 
 | Tabla | Descripcion |
 |-------|-------------|
-| `usuarios` | id_usuario, nombre, email, fecha_registro |
-| `libros` | id_libro, titulo, autor, disponible (1/0) |
-| `prestamos` | id_prestamo, id_usuario (FK), id_libro (FK), fecha_prestamo, fecha_devolucion, estado |
+| `categorias` | Categorias literarias de los libros |
+| `usuarios` | Usuarios registrados en la biblioteca |
+| `libros` | Catalogo de libros con disponibilidad y categoria |
+| `prestamos` | Registro de prestamos activos y devueltos |
+| `resenas` | Resenas de libros por usuarios (calificacion 1-5) |
 
-**Credenciales**: usuario `biblioteca` / password `Biblioteca123`
+**Credenciales Docker**: usuario `biblioteca` / password `Biblioteca123`
 
-## Endpoints
+---
 
-### BFF Service (EC2 - puerto 8080)
+## Endpoints REST — BFF Service
 
-Todas las rutas pasan por el prefijo `/api/bff`.
+Base URL: `http://<IP_ELASTICA>:8080`
 
 | Metodo | Ruta | Descripcion |
 |--------|------|-------------|
@@ -83,86 +69,122 @@ Todas las rutas pasan por el prefijo `/api/bff`.
 | GET | `/api/bff/libros` | Listar catalogo de libros |
 | POST | `/api/bff/libros` | Registrar nuevo libro |
 | GET | `/api/bff/prestamos` | Listar prestamos con detalle |
-| POST | `/api/bff/prestamos` | Crear prestamo de libro |
+| POST | `/api/bff/prestamos` | Crear prestamo (valida disponibilidad) |
 
-### Azure Functions (acceso directo)
+---
 
-**Function App Usuarios** (`biblio-users-g11.azurewebsites.net`):
+## Endpoints GraphQL
 
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| GET | `/api/usuarios` | Listar usuarios |
-| POST | `/api/usuarios` | Crear usuario |
+Ambos endpoints reciben `POST` con body `{ "query": "..." }`.
 
-**Function App Prestamos** (`biblio-prestamos-g11.azurewebsites.net`):
+### GraphQL Consultas — `biblio-graphql-consultas-g11`
+Ruta: `POST /api/graphql/consultas`
 
-| Metodo | Ruta | Descripcion |
-|--------|------|-------------|
-| GET | `/api/libros` | Listar libros |
-| POST | `/api/libros` | Crear libro |
-| GET | `/api/prestamos` | Listar prestamos |
-| POST | `/api/prestamos` | Crear prestamo |
+**Queries disponibles:**
 
-### Ejemplos de Body (JSON)
+```graphql
+# Todos los usuarios
+{ usuarios { idUsuario nombre email fechaRegistro } }
+
+# Usuario con sus prestamos
+{ usuario(id: 1) { nombre prestamos { tituloLibro estado fechaPrestamo } } }
+
+# Todos los libros con categoria y resenas
+{ libros { titulo autor disponible categoria { nombre } resenas { calificacion comentario } } }
+
+# Libro por ID
+{ libro(id: 1) { titulo categoria { nombre } resenas { nombreUsuario calificacion comentario } } }
+
+# Todas las categorias
+{ categorias { idCategoria nombre descripcion } }
+
+# Libros filtrados por categoria
+{ librosPorCategoria(idCategoria: 1) { titulo autor disponible } }
+
+# Prestamos de un usuario
+{ prestamosPorUsuario(idUsuario: 1) { tituloLibro fechaPrestamo estado } }
+
+# Resenas de un libro
+{ resenasPorLibro(idLibro: 1) { nombreUsuario calificacion comentario fecha } }
+```
+
+### GraphQL Operaciones — `biblio-graphql-operaciones-g11`
+Ruta: `POST /api/graphql/operaciones`
+
+**Mutations disponibles:**
+
+```graphql
+# Crear categoria
+mutation { crearCategoria(nombre: "Ciencia Ficcion", descripcion: "...") { idCategoria nombre } }
+
+# Asignar categoria a libro
+mutation { asignarCategoria(idLibro: 1, idCategoria: 2) { idLibro titulo } }
+
+# Crear resena (calificacion: 1 a 5)
+mutation { crearResena(idUsuario: 1, idLibro: 1, calificacion: 5, comentario: "Excelente") { idResena fecha } }
+
+# Devolver libro (cambia estado a DEVUELTO y libera el libro)
+mutation { devolverLibro(idPrestamo: 1) { idPrestamo estado fechaDevolucion } }
+```
+
+---
+
+## Ejemplos de Body REST (JSON)
 
 **Crear Usuario:**
 ```json
-{
-    "nombre": "Maria Lopez",
-    "email": "maria.lopez@duocuc.cl"
-}
+{ "nombre": "Maria Lopez", "email": "maria.lopez@duocuc.cl" }
 ```
 
 **Crear Libro:**
 ```json
-{
-    "titulo": "Cien Anos de Soledad",
-    "autor": "Gabriel Garcia Marquez"
-}
+{ "titulo": "Cien Anos de Soledad", "autor": "Gabriel Garcia Marquez" }
 ```
 
 **Crear Prestamo:**
 ```json
-{
-    "idUsuario": 1,
-    "idLibro": 1
-}
+{ "idUsuario": 1, "idLibro": 1 }
 ```
+
+---
 
 ## Despliegue
 
-### EC2 (BFF + Oracle)
+### EC2 — BFF + Oracle
 
 ```bash
-# Levantar contenedores
+# Levantar todo
 docker compose up -d --build
 
-# Ver logs
-docker compose logs -f
-
-# Reconstruir solo el BFF
+# Solo reconstruir BFF
 docker compose up -d --build bff-service
 
-# Recrear desde cero (elimina datos)
-docker compose down -v
-docker compose up -d
+# Recrear desde cero (borra datos)
+docker compose down -v && docker compose up -d
+
+# Logs
+docker compose logs -f oracle-db
+docker compose logs -f bff-service
 ```
 
-### Azure Functions
-
-Desplegar desde VS Code con la extension Azure Functions, o por CLI:
+### Migrar tablas en DB ya existente
 
 ```bash
-# Usuarios
-cd function-usuarios
-mvn clean package azure-functions:deploy
-
-# Prestamos
-cd function-prestamos
-mvn clean package azure-functions:deploy
+docker exec -it biblioteca-db sqlplus biblioteca/Biblioteca123@//localhost:1521/XEPDB1 @/tmp/migration_graphql.sql
 ```
 
-**Variables de entorno requeridas en Azure Portal** (Configuration > Application settings):
+### Azure Functions — Despliegue
+
+Desde VS Code con la extension Azure Functions, o por CLI:
+
+```bash
+cd function-usuarios && mvn clean package azure-functions:deploy
+cd function-prestamos && mvn clean package azure-functions:deploy
+cd function-graphql-consultas && mvn clean package azure-functions:deploy
+cd function-graphql-operaciones && mvn clean package azure-functions:deploy
+```
+
+**Variables de entorno (Azure Portal > Configuration > Application settings):**
 
 | Variable | Valor |
 |----------|-------|
@@ -170,32 +192,39 @@ mvn clean package azure-functions:deploy
 | `ORACLE_DB_USER` | `biblioteca` |
 | `ORACLE_DB_PASSWORD` | `Biblioteca123` |
 
-### Puertos requeridos en Security Group (EC2)
+### Security Group EC2 — Puertos requeridos
 
-| Puerto | Protocolo | Uso |
-|--------|-----------|-----|
-| 8080 | TCP | BFF Service |
-| 1521 | TCP | Oracle DB (acceso Azure Functions) |
-| 22 | TCP | SSH |
+| Puerto | Uso |
+|--------|-----|
+| 22 | SSH |
+| 8080 | BFF Service |
+| 1521 | Oracle DB (Azure Functions) |
+
+---
 
 ## Postman
 
-Importar el archivo `Sistema-Biblioteca-DuocUC.postman_collection.json` en Postman.
+Importar `Sistema-Biblioteca-DuocUC.postman_collection.json`.
 
-Variables de coleccion:
+Variables de coleccion a configurar:
 
 | Variable | Valor |
 |----------|-------|
 | `BFF_URL` | `http://<IP_ELASTICA>:8080` |
 | `AZ_USUARIOS_URL` | `https://biblio-users-g11.azurewebsites.net` |
 | `AZ_PRESTAMOS_URL` | `https://biblio-prestamos-g11.azurewebsites.net` |
+| `AZ_GQL_CONSULTAS_URL` | `https://biblio-graphql-consultas-g11.azurewebsites.net` |
+| `AZ_GQL_OPERACIONES_URL` | `https://biblio-graphql-operaciones-g11.azurewebsites.net` |
+
+---
 
 ## Tecnologias
 
-- **Java 21**
-- **Spring Boot 3.4.3** (BFF)
-- **Azure Functions 4.x** (Serverless)
-- **Oracle XE 21c** (Base de datos)
-- **Docker / Docker Compose** (Contenedores)
-- **AWS EC2** (Infraestructura)
-- **Maven** (Build)
+| Componente | Tecnologia |
+|---|---|
+| BFF | Spring Boot 3.4.3, Java 21 |
+| Azure Functions | Azure Functions 4.x, Java 21 |
+| GraphQL | graphql-java 21.5 |
+| Base de datos | Oracle XE 21c |
+| Infraestructura | Docker, AWS EC2, Azure |
+| Build | Maven |
