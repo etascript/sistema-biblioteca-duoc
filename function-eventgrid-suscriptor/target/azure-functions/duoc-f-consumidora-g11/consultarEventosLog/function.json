@@ -1,0 +1,16 @@
+{
+  "scriptFile" : "../function-eventgrid-suscriptor-1.0-SNAPSHOT.jar",
+  "entryPoint" : "com.function.EventGridSuscriptorFunction.consultarEventosLog",
+  "bindings" : [ {
+    "type" : "httpTrigger",
+    "direction" : "in",
+    "name" : "req",
+    "route" : "eventos/log",
+    "methods" : [ "GET" ],
+    "authLevel" : "ANONYMOUS"
+  }, {
+    "type" : "http",
+    "direction" : "out",
+    "name" : "$return"
+  } ]
+}

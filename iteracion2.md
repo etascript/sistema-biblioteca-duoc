@@ -167,7 +167,7 @@ Tu PC (localhost)
                                             |
                                             v
                                 Oracle XE 21c en EC2
-                                44.233.50.94:1521
+                                44.226.152.17:1521
 ```
 
 ### Comando para levantar

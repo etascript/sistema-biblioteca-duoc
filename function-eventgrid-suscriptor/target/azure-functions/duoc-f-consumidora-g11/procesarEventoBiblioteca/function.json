@@ -1,0 +1,9 @@
+{
+  "scriptFile" : "../function-eventgrid-suscriptor-1.0-SNAPSHOT.jar",
+  "entryPoint" : "com.function.EventGridSuscriptorFunction.procesarEvento",
+  "bindings" : [ {
+    "type" : "eventGridTrigger",
+    "direction" : "in",
+    "name" : "event"
+  } ]
+}

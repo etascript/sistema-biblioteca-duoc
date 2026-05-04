@@ -1,0 +1,16 @@
+{
+  "scriptFile" : "../function-eventgrid-publicador-1.0-SNAPSHOT.jar",
+  "entryPoint" : "com.function.EventGridPublicadorFunction.publicarEvento",
+  "bindings" : [ {
+    "type" : "httpTrigger",
+    "direction" : "in",
+    "name" : "req",
+    "route" : "eventos/publicar",
+    "methods" : [ "POST" ],
+    "authLevel" : "ANONYMOUS"
+  }, {
+    "type" : "http",
+    "direction" : "out",
+    "name" : "$return"
+  } ]
+}

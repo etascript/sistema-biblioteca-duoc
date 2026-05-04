@@ -8,7 +8,7 @@ public class DatabaseHelper {
 
     private static final String DB_URL = System.getenv("ORACLE_DB_URL") != null
             ? System.getenv("ORACLE_DB_URL")
-            : "jdbc:mysql://44.233.50.94:3306/biblioteca";
+            : "jdbc:oracle:thin:@44.226.152.17:1521/XEPDB1";
 
     private static final String DB_USER = System.getenv("ORACLE_DB_USER") != null
             ? System.getenv("ORACLE_DB_USER")

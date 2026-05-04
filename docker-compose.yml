@@ -45,7 +45,7 @@ services:
     environment:
       - AzureWebJobsStorage=UseDevelopmentStorage=false
       - FUNCTIONS_WORKER_RUNTIME=java
-      - ORACLE_DB_URL=jdbc:oracle:thin:@44.233.50.94:1521/XEPDB1
+      - ORACLE_DB_URL=jdbc:oracle:thin:@44.226.152.17:1521/XEPDB1
       - ORACLE_DB_USER=biblioteca
       - ORACLE_DB_PASSWORD=Biblioteca123
     restart: unless-stopped
@@ -60,7 +60,43 @@ services:
     environment:
       - AzureWebJobsStorage=UseDevelopmentStorage=false
       - FUNCTIONS_WORKER_RUNTIME=java
-      - ORACLE_DB_URL=jdbc:oracle:thin:@44.233.50.94:1521/XEPDB1
+      - ORACLE_DB_URL=jdbc:oracle:thin:@44.226.152.17:1521/XEPDB1
+      - ORACLE_DB_USER=biblioteca
+      - ORACLE_DB_PASSWORD=Biblioteca123
+    restart: unless-stopped
+
+  # Publicador de eventos a Azure Event Grid (HTTP Trigger -> Event Grid Custom Topic)
+  # Requiere EVENT_GRID_TOPIC_ENDPOINT y EVENT_GRID_TOPIC_KEY configurados en Azure
+  eventgrid-publicador:
+    build:
+      context: ./function-eventgrid-publicador
+      dockerfile: Dockerfile
+    container_name: biblioteca-eg-publicador
+    ports:
+      - "8083:80"
+    environment:
+      - AzureWebJobsStorage=UseDevelopmentStorage=false
+      - FUNCTIONS_WORKER_RUNTIME=java
+      - EVENT_GRID_TOPIC_ENDPOINT=${EVENT_GRID_TOPIC_ENDPOINT}
+      - EVENT_GRID_TOPIC_KEY=${EVENT_GRID_TOPIC_KEY}
+    restart: unless-stopped
+
+  # Suscriptor de eventos de Azure Event Grid (EventGrid Trigger -> Oracle DB)
+  # El trigger EventGrid requiere AzureWebJobsStorage con una cuenta de Azure Storage real.
+  # En producción, Azure Event Grid envía eventos al endpoint del runtime:
+  #   POST https://<functionApp>/runtime/webhooks/EventGrid?functionName=procesarEventoBiblioteca
+  # El endpoint GET /api/eventos/log permite verificar los eventos procesados.
+  eventgrid-suscriptor:
+    build:
+      context: ./function-eventgrid-suscriptor
+      dockerfile: Dockerfile
+    container_name: biblioteca-eg-suscriptor
+    ports:
+      - "8084:80"
+    environment:
+      - AzureWebJobsStorage=${AZURE_STORAGE_CONNECTION_STRING}
+      - FUNCTIONS_WORKER_RUNTIME=java
+      - ORACLE_DB_URL=jdbc:oracle:thin:@44.226.152.17:1521/XEPDB1
       - ORACLE_DB_USER=biblioteca
       - ORACLE_DB_PASSWORD=Biblioteca123
     restart: unless-stopped

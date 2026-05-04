@@ -2,13 +2,13 @@
 	"info": {
 		"_postman_id": "c1b2c3d4-e5f6-7890-abcd-ef1234567890",
 		"name": "Sistema Biblioteca DuocUC",
-		"description": "Coleccion completa: BFF REST, Azure Functions REST y Azure Functions GraphQL.",
+		"description": "Coleccion completa: BFF REST, Azure Functions REST, GraphQL y Event Grid.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
 		{
 			"key": "BFF_URL",
-			"value": "http://44.233.50.94:8080",
+			"value": "http://44.226.152.17:8080",
 			"description": "IP Elastica EC2 - BFF Spring Boot"
 		},
 		{
@@ -30,6 +30,26 @@
 			"key": "AZ_GQL_OPERACIONES_URL",
 			"value": "http://localhost:8082",
 			"description": "GraphQL Operaciones - Docker local (puerto 8082)"
+		},
+		{
+			"key": "AZ_EG_PUBLICADOR_URL",
+			"value": "https://biblio-eg-publicador-g11.azurewebsites.net",
+			"description": "Event Grid Publicador - Azure (produccion)"
+		},
+		{
+			"key": "AZ_EG_SUSCRIPTOR_URL",
+			"value": "https://biblio-eg-suscriptor-g11.azurewebsites.net",
+			"description": "Event Grid Suscriptor - Azure (produccion)"
+		},
+		{
+			"key": "EG_PUBLICADOR_LOCAL",
+			"value": "http://localhost:8083",
+			"description": "Event Grid Publicador - Docker local (puerto 8083)"
+		},
+		{
+			"key": "EG_SUSCRIPTOR_LOCAL",
+			"value": "http://localhost:8084",
+			"description": "Event Grid Suscriptor - Docker local (puerto 8084)"
 		}
 	],
 	"item": [
@@ -331,6 +351,214 @@
 							"raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
 							"host": ["{{AZ_GQL_OPERACIONES_URL}}"],
 							"path": ["api", "graphql", "operaciones"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Event Grid - Publicador",
+			"description": "Publica eventos al Custom Topic de Azure Event Grid.\nUsa {{AZ_EG_PUBLICADOR_URL}} en Azure o {{EG_PUBLICADOR_LOCAL}} en Docker local.\n\nFlujo: este endpoint actúa como generador de eventos. Azure Event Grid enruta cada evento al suscriptor registrado (function-eventgrid-suscriptor), que lo persiste en la tabla eventos_log de Oracle.",
+			"item": [
+				{
+					"name": "Publicar - Prestamo Creado",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tipo\": \"PRESTAMO_CREADO\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"nombreUsuario\": \"Sebastian Cortes\",\n        \"tituloLibro\": \"Cien Anos de Soledad\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+							"host": ["{{AZ_EG_PUBLICADOR_URL}}"],
+							"path": ["api", "eventos", "publicar"]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Evento publicado",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [{"key": "Content-Type", "value": "application/json"}],
+							"body": "{\n    \"mensaje\": \"Evento publicado correctamente en Azure Event Grid\",\n    \"idEvento\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n    \"tipoEvento\": \"biblioteca.prestamo.creado\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"nombreUsuario\": \"Sebastian Cortes\",\n        \"tituloLibro\": \"Cien Anos de Soledad\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Publicar - Libro Devuelto",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tipo\": \"LIBRO_DEVUELTO\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"tituloLibro\": \"Cien Anos de Soledad\",\n        \"fechaDevolucion\": \"2026-05-03\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+							"host": ["{{AZ_EG_PUBLICADOR_URL}}"],
+							"path": ["api", "eventos", "publicar"]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Evento publicado",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [{"key": "Content-Type", "value": "application/json"}],
+							"body": "{\n    \"mensaje\": \"Evento publicado correctamente en Azure Event Grid\",\n    \"idEvento\": \"b2c3d4e5-f6a7-8901-bcde-f12345678901\",\n    \"tipoEvento\": \"biblioteca.prestamo.devuelto\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idLibro\": \"2\",\n        \"fechaDevolucion\": \"2026-05-03\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Publicar - Usuario Registrado",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tipo\": \"USUARIO_REGISTRADO\",\n    \"asunto\": \"usuarios/3\",\n    \"datos\": {\n        \"idUsuario\": \"3\",\n        \"nombre\": \"Carlos Mendoza\",\n        \"email\": \"carlos.mendoza@duocuc.cl\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+							"host": ["{{AZ_EG_PUBLICADOR_URL}}"],
+							"path": ["api", "eventos", "publicar"]
+						}
+					}
+				},
+				{
+					"name": "Publicar - Tipo Invalido (error esperado)",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tipo\": \"TIPO_INEXISTENTE\",\n    \"asunto\": \"test/1\",\n    \"datos\": {}\n}"
+						},
+						"url": {
+							"raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+							"host": ["{{AZ_EG_PUBLICADOR_URL}}"],
+							"path": ["api", "eventos", "publicar"]
+						}
+					},
+					"response": [
+						{
+							"name": "400 Bad Request - Tipo invalido",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [{"key": "Content-Type", "value": "application/json"}],
+							"body": "{\n    \"error\": \"Tipo de evento no reconocido: 'TIPO_INEXISTENTE'. Valores permitidos: PRESTAMO_CREADO, LIBRO_DEVUELTO, USUARIO_REGISTRADO\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Publicar - Cuerpo Vacio (error esperado)",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+							"host": ["{{AZ_EG_PUBLICADOR_URL}}"],
+							"path": ["api", "eventos", "publicar"]
+						}
+					},
+					"response": [
+						{
+							"name": "400 Bad Request - Campos obligatorios",
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [{"key": "Content-Type", "value": "application/json"}],
+							"body": "{\n    \"error\": \"Los campos 'tipo' y 'asunto' son obligatorios. Tipos validos: PRESTAMO_CREADO, LIBRO_DEVUELTO, USUARIO_REGISTRADO\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Event Grid - Suscriptor / Log",
+			"description": "Consulta el historial de eventos recibidos desde Azure Event Grid y procesados por la función suscriptora.\nCada evento publicado por el publicador llega aqui luego de ser enrutado por Event Grid.\n\nUsa {{AZ_EG_SUSCRIPTOR_URL}} en Azure o {{EG_SUSCRIPTOR_LOCAL}} en Docker local.",
+			"item": [
+				{
+					"name": "Ver Todos los Eventos Recibidos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log",
+							"host": ["{{AZ_EG_SUSCRIPTOR_URL}}"],
+							"path": ["api", "eventos", "log"]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Lista de eventos",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [{"key": "Content-Type", "value": "application/json"}],
+							"body": "[\n    {\n        \"idEvento\": 2,\n        \"tipoEvento\": \"biblioteca.prestamo.devuelto\",\n        \"asunto\": \"prestamos/1\",\n        \"datos\": \"{\\\"idPrestamo\\\":\\\"1\\\",\\\"tituloLibro\\\":\\\"Cien Anos de Soledad\\\",\\\"fechaDevolucion\\\":\\\"2026-05-03\\\"}\",\n        \"fechaRecibido\": \"2026-05-03\"\n    },\n    {\n        \"idEvento\": 1,\n        \"tipoEvento\": \"biblioteca.prestamo.creado\",\n        \"asunto\": \"prestamos/1\",\n        \"datos\": \"{\\\"idPrestamo\\\":\\\"1\\\",\\\"idUsuario\\\":\\\"1\\\",\\\"idLibro\\\":\\\"2\\\",\\\"tituloLibro\\\":\\\"Cien Anos de Soledad\\\"}\",\n        \"fechaRecibido\": \"2026-05-03\"\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Ver Eventos Filtrados por Tipo - Prestamo Creado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log?tipo=biblioteca.prestamo.creado",
+							"host": ["{{AZ_EG_SUSCRIPTOR_URL}}"],
+							"path": ["api", "eventos", "log"],
+							"query": [
+								{
+									"key": "tipo",
+									"value": "biblioteca.prestamo.creado"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Ver Eventos Filtrados por Tipo - Libro Devuelto",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log?tipo=biblioteca.prestamo.devuelto",
+							"host": ["{{AZ_EG_SUSCRIPTOR_URL}}"],
+							"path": ["api", "eventos", "log"],
+							"query": [
+								{
+									"key": "tipo",
+									"value": "biblioteca.prestamo.devuelto"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Ver Eventos Filtrados por Tipo - Usuario Registrado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log?tipo=biblioteca.usuario.registrado",
+							"host": ["{{AZ_EG_SUSCRIPTOR_URL}}"],
+							"path": ["api", "eventos", "log"],
+							"query": [
+								{
+									"key": "tipo",
+									"value": "biblioteca.usuario.registrado"
+								}
+							]
 						}
 					}
 				}
