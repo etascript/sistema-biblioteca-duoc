@@ -57,6 +57,62 @@ public class UsuarioFunction {
         }
     }
 
+    @FunctionName("obtenerUsuarioPorId")
+    public HttpResponseMessage getUsuarioPorId(
+            @HttpTrigger(
+                name = "req",
+                methods = {HttpMethod.GET},
+                authLevel = AuthorizationLevel.ANONYMOUS,
+                route = "usuarios/{id}"
+            ) HttpRequestMessage<Optional<String>> request,
+            @BindingName("id") String id,
+            final ExecutionContext context) {
+
+        context.getLogger().info("GET /api/usuarios/" + id + " - Consultando usuario...");
+
+        int idUsuario;
+        try {
+            idUsuario = Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST)
+                    .header("Content-Type", "application/json")
+                    .body("{\"error\": \"ID de usuario invalido\"}").build();
+        }
+
+        String sql = "SELECT id_usuario, nombre, email, fecha_registro FROM usuarios WHERE id_usuario = ?";
+
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, idUsuario);
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) {
+                return request.createResponseBuilder(HttpStatus.NOT_FOUND)
+                        .header("Content-Type", "application/json")
+                        .body("{\"error\": \"Usuario no encontrado\"}").build();
+            }
+
+            Map<String, Object> usuario = new HashMap<>();
+            usuario.put("idUsuario", rs.getInt("id_usuario"));
+            usuario.put("nombre", rs.getString("nombre"));
+            usuario.put("email", rs.getString("email"));
+            usuario.put("fechaRegistro", rs.getString("fecha_registro"));
+
+            return request.createResponseBuilder(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(gson.toJson(usuario))
+                    .build();
+
+        } catch (SQLException e) {
+            context.getLogger().severe("Error de BD: " + e.getMessage());
+            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .header("Content-Type", "application/json")
+                    .body("{\"error\": \"Error al consultar usuario: " + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+
     @FunctionName("crearUsuario")
     public HttpResponseMessage crearUsuario(
             @HttpTrigger(

@@ -64,6 +64,68 @@ public class PrestamoFunction {
         }
     }
 
+    @FunctionName("obtenerPrestamoPorId")
+    public HttpResponseMessage getPrestamoPorId(
+            @HttpTrigger(name = "req", methods = {HttpMethod.GET}, authLevel = AuthorizationLevel.ANONYMOUS, route = "prestamos/{id}")
+            HttpRequestMessage<Optional<String>> request,
+            @BindingName("id") String id,
+            final ExecutionContext context) {
+
+        context.getLogger().info("GET /api/prestamos/" + id + " - Consultando prestamo...");
+
+        int idPrestamo;
+        try {
+            idPrestamo = Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST)
+                    .header("Content-Type", "application/json")
+                    .body("{\"error\": \"ID de prestamo invalido\"}").build();
+        }
+
+        String sql = "SELECT p.id_prestamo, p.id_usuario, u.nombre AS nombre_usuario, " +
+                     "p.id_libro, l.titulo AS titulo_libro, " +
+                     "p.fecha_prestamo, p.fecha_devolucion, p.estado " +
+                     "FROM prestamos p " +
+                     "JOIN usuarios u ON p.id_usuario = u.id_usuario " +
+                     "JOIN libros l ON p.id_libro = l.id_libro " +
+                     "WHERE p.id_prestamo = ?";
+
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, idPrestamo);
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) {
+                return request.createResponseBuilder(HttpStatus.NOT_FOUND)
+                        .header("Content-Type", "application/json")
+                        .body("{\"error\": \"Prestamo no encontrado\"}").build();
+            }
+
+            Map<String, Object> prestamo = new HashMap<>();
+            prestamo.put("idPrestamo", rs.getInt("id_prestamo"));
+            prestamo.put("idUsuario", rs.getInt("id_usuario"));
+            prestamo.put("nombreUsuario", rs.getString("nombre_usuario"));
+            prestamo.put("idLibro", rs.getInt("id_libro"));
+            prestamo.put("tituloLibro", rs.getString("titulo_libro"));
+            prestamo.put("fechaPrestamo", rs.getString("fecha_prestamo"));
+            prestamo.put("fechaDevolucion", rs.getString("fecha_devolucion"));
+            prestamo.put("estado", rs.getString("estado"));
+
+            return request.createResponseBuilder(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(gson.toJson(prestamo))
+                    .build();
+
+        } catch (SQLException e) {
+            context.getLogger().severe("Error de BD: " + e.getMessage());
+            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .header("Content-Type", "application/json")
+                    .body("{\"error\": \"Error al consultar prestamo: " + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+
     @FunctionName("crearPrestamo")
     public HttpResponseMessage crearPrestamo(
             @HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS, route = "prestamos")

@@ -20,6 +20,11 @@ public class BffController {
         return ResponseEntity.ok(bffService.getUsuarios());
     }
 
+    @GetMapping("/usuarios/{id}")
+    public ResponseEntity<Object> obtenerUsuarioPorId(@PathVariable int id) {
+        return ResponseEntity.ok(bffService.getUsuarioPorId(id));
+    }
+
     @PostMapping("/usuarios")
     public ResponseEntity<Object> crearUsuario(@RequestBody Object body) {
         return ResponseEntity.status(201).body(bffService.crearUsuario(body));
@@ -40,6 +45,11 @@ public class BffController {
     @GetMapping("/prestamos")
     public ResponseEntity<Object> listarPrestamos() {
         return ResponseEntity.ok(bffService.getPrestamos());
+    }
+
+    @GetMapping("/prestamos/{id}")
+    public ResponseEntity<Object> obtenerPrestamoPorId(@PathVariable int id) {
+        return ResponseEntity.ok(bffService.getPrestamoPorId(id));
     }
 
     @PostMapping("/prestamos")

@@ -1,625 +1,1249 @@
 {
-	"info": {
-		"_postman_id": "c1b2c3d4-e5f6-7890-abcd-ef1234567890",
-		"name": "Sistema Biblioteca DuocUC",
-		"description": "Coleccion completa: BFF REST, Azure Functions REST, GraphQL y Event Grid.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"variable": [
-		{
-			"key": "BFF_URL",
-			"value": "http://44.226.152.17:8080",
-			"description": "IP Elastica EC2 - BFF Spring Boot"
-		},
-		{
-			"key": "AZ_USUARIOS_URL",
-			"value": "https://biblio-users-g11.azurewebsites.net",
-			"description": "Azure Function App - Usuarios"
-		},
-		{
-			"key": "AZ_PRESTAMOS_URL",
-			"value": "https://biblio-prestamos-g11.azurewebsites.net",
-			"description": "Azure Function App - Prestamos y Libros"
-		},
-		{
-			"key": "AZ_GQL_CONSULTAS_URL",
-			"value": "http://localhost:8081",
-			"description": "GraphQL Consultas - Docker local (puerto 8081)"
-		},
-		{
-			"key": "AZ_GQL_OPERACIONES_URL",
-			"value": "http://localhost:8082",
-			"description": "GraphQL Operaciones - Docker local (puerto 8082)"
-		},
-		{
-			"key": "AZ_EG_PUBLICADOR_URL",
-			"value": "https://biblio-eg-publicador-g11.azurewebsites.net",
-			"description": "Event Grid Publicador - Azure (produccion)"
-		},
-		{
-			"key": "AZ_EG_SUSCRIPTOR_URL",
-			"value": "https://biblio-eg-suscriptor-g11.azurewebsites.net",
-			"description": "Event Grid Suscriptor - Azure (produccion)"
-		},
-		{
-			"key": "EG_PUBLICADOR_LOCAL",
-			"value": "http://localhost:8083",
-			"description": "Event Grid Publicador - Docker local (puerto 8083)"
-		},
-		{
-			"key": "EG_SUSCRIPTOR_LOCAL",
-			"value": "http://localhost:8084",
-			"description": "Event Grid Suscriptor - Docker local (puerto 8084)"
-		}
-	],
-	"item": [
-		{
-			"name": "BFF - Usuarios",
-			"item": [
-				{
-					"name": "Listar Usuarios",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{BFF_URL}}/api/bff/usuarios",
-							"host": ["{{BFF_URL}}"],
-							"path": ["api", "bff", "usuarios"]
-						}
-					}
-				},
-				{
-					"name": "Crear Usuario",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"nombre\": \"Maria Lopez\",\n    \"email\": \"maria.lopez@duocuc.cl\"\n}"
-						},
-						"url": {
-							"raw": "{{BFF_URL}}/api/bff/usuarios",
-							"host": ["{{BFF_URL}}"],
-							"path": ["api", "bff", "usuarios"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "BFF - Libros",
-			"item": [
-				{
-					"name": "Listar Libros",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{BFF_URL}}/api/bff/libros",
-							"host": ["{{BFF_URL}}"],
-							"path": ["api", "bff", "libros"]
-						}
-					}
-				},
-				{
-					"name": "Crear Libro",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"titulo\": \"La Casa de los Espiritus\",\n    \"autor\": \"Isabel Allende\"\n}"
-						},
-						"url": {
-							"raw": "{{BFF_URL}}/api/bff/libros",
-							"host": ["{{BFF_URL}}"],
-							"path": ["api", "bff", "libros"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "BFF - Prestamos",
-			"item": [
-				{
-					"name": "Listar Prestamos",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{BFF_URL}}/api/bff/prestamos",
-							"host": ["{{BFF_URL}}"],
-							"path": ["api", "bff", "prestamos"]
-						}
-					}
-				},
-				{
-					"name": "Crear Prestamo",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"idUsuario\": 1,\n    \"idLibro\": 1\n}"
-						},
-						"url": {
-							"raw": "{{BFF_URL}}/api/bff/prestamos",
-							"host": ["{{BFF_URL}}"],
-							"path": ["api", "bff", "prestamos"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "GraphQL - Consultas (Queries)",
-			"description": "Consultas complejas via GraphQL. Endpoint: POST /api/graphql/consultas",
-			"item": [
-				{
-					"name": "Todos los Usuarios",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"{ usuarios { idUsuario nombre email fechaRegistro } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
-							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
-							"path": ["api", "graphql", "consultas"]
-						}
-					}
-				},
-				{
-					"name": "Usuario con sus Prestamos",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"{ usuario(id: 1) { idUsuario nombre email prestamos { idPrestamo tituloLibro fechaPrestamo estado } } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
-							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
-							"path": ["api", "graphql", "consultas"]
-						}
-					}
-				},
-				{
-					"name": "Todos los Libros con Categoria y Resenas",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"{ libros { idLibro titulo autor disponible categoria { nombre } resenas { calificacion comentario nombreUsuario } } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
-							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
-							"path": ["api", "graphql", "consultas"]
-						}
-					}
-				},
-				{
-					"name": "Libro por ID",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"{ libro(id: 1) { idLibro titulo autor disponible categoria { nombre descripcion } resenas { nombreUsuario calificacion comentario fecha } } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
-							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
-							"path": ["api", "graphql", "consultas"]
-						}
-					}
-				},
-				{
-					"name": "Todas las Categorias",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"{ categorias { idCategoria nombre descripcion } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
-							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
-							"path": ["api", "graphql", "consultas"]
-						}
-					}
-				},
-				{
-					"name": "Libros por Categoria",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"{ librosPorCategoria(idCategoria: 1) { idLibro titulo autor disponible } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
-							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
-							"path": ["api", "graphql", "consultas"]
-						}
-					}
-				},
-				{
-					"name": "Prestamos por Usuario",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"{ prestamosPorUsuario(idUsuario: 1) { idPrestamo tituloLibro fechaPrestamo fechaDevolucion estado } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
-							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
-							"path": ["api", "graphql", "consultas"]
-						}
-					}
-				},
-				{
-					"name": "Resenas por Libro",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"{ resenasPorLibro(idLibro: 1) { idResena nombreUsuario calificacion comentario fecha } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
-							"host": ["{{AZ_GQL_CONSULTAS_URL}}"],
-							"path": ["api", "graphql", "consultas"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "GraphQL - Operaciones (Mutations)",
-			"description": "Mutaciones via GraphQL. Endpoint: POST /api/graphql/operaciones",
-			"item": [
-				{
-					"name": "Crear Categoria",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"mutation { crearCategoria(nombre: \\\"Ciencia Ficcion\\\", descripcion: \\\"Obras de ciencia ficcion y fantasia\\\") { idCategoria nombre descripcion } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
-							"host": ["{{AZ_GQL_OPERACIONES_URL}}"],
-							"path": ["api", "graphql", "operaciones"]
-						}
-					}
-				},
-				{
-					"name": "Asignar Categoria a Libro",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"mutation { asignarCategoria(idLibro: 1, idCategoria: 1) { idLibro titulo autor } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
-							"host": ["{{AZ_GQL_OPERACIONES_URL}}"],
-							"path": ["api", "graphql", "operaciones"]
-						}
-					}
-				},
-				{
-					"name": "Crear Resena",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"mutation { crearResena(idUsuario: 1, idLibro: 1, calificacion: 5, comentario: \\\"Excelente lectura\\\") { idResena calificacion comentario fecha } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
-							"host": ["{{AZ_GQL_OPERACIONES_URL}}"],
-							"path": ["api", "graphql", "operaciones"]
-						}
-					}
-				},
-				{
-					"name": "Devolver Libro",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"query\": \"mutation { devolverLibro(idPrestamo: 1) { idPrestamo estado fechaDevolucion } }\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
-							"host": ["{{AZ_GQL_OPERACIONES_URL}}"],
-							"path": ["api", "graphql", "operaciones"]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Event Grid - Publicador",
-			"description": "Publica eventos al Custom Topic de Azure Event Grid.\nUsa {{AZ_EG_PUBLICADOR_URL}} en Azure o {{EG_PUBLICADOR_LOCAL}} en Docker local.\n\nFlujo: este endpoint actúa como generador de eventos. Azure Event Grid enruta cada evento al suscriptor registrado (function-eventgrid-suscriptor), que lo persiste en la tabla eventos_log de Oracle.",
-			"item": [
-				{
-					"name": "Publicar - Prestamo Creado",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"tipo\": \"PRESTAMO_CREADO\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"nombreUsuario\": \"Sebastian Cortes\",\n        \"tituloLibro\": \"Cien Anos de Soledad\"\n    }\n}"
-						},
-						"url": {
-							"raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
-							"host": ["{{AZ_EG_PUBLICADOR_URL}}"],
-							"path": ["api", "eventos", "publicar"]
-						}
-					},
-					"response": [
-						{
-							"name": "200 OK - Evento publicado",
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [{"key": "Content-Type", "value": "application/json"}],
-							"body": "{\n    \"mensaje\": \"Evento publicado correctamente en Azure Event Grid\",\n    \"idEvento\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n    \"tipoEvento\": \"biblioteca.prestamo.creado\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"nombreUsuario\": \"Sebastian Cortes\",\n        \"tituloLibro\": \"Cien Anos de Soledad\"\n    }\n}"
-						}
-					]
-				},
-				{
-					"name": "Publicar - Libro Devuelto",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"tipo\": \"LIBRO_DEVUELTO\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"tituloLibro\": \"Cien Anos de Soledad\",\n        \"fechaDevolucion\": \"2026-05-03\"\n    }\n}"
-						},
-						"url": {
-							"raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
-							"host": ["{{AZ_EG_PUBLICADOR_URL}}"],
-							"path": ["api", "eventos", "publicar"]
-						}
-					},
-					"response": [
-						{
-							"name": "200 OK - Evento publicado",
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [{"key": "Content-Type", "value": "application/json"}],
-							"body": "{\n    \"mensaje\": \"Evento publicado correctamente en Azure Event Grid\",\n    \"idEvento\": \"b2c3d4e5-f6a7-8901-bcde-f12345678901\",\n    \"tipoEvento\": \"biblioteca.prestamo.devuelto\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idLibro\": \"2\",\n        \"fechaDevolucion\": \"2026-05-03\"\n    }\n}"
-						}
-					]
-				},
-				{
-					"name": "Publicar - Usuario Registrado",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"tipo\": \"USUARIO_REGISTRADO\",\n    \"asunto\": \"usuarios/3\",\n    \"datos\": {\n        \"idUsuario\": \"3\",\n        \"nombre\": \"Carlos Mendoza\",\n        \"email\": \"carlos.mendoza@duocuc.cl\"\n    }\n}"
-						},
-						"url": {
-							"raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
-							"host": ["{{AZ_EG_PUBLICADOR_URL}}"],
-							"path": ["api", "eventos", "publicar"]
-						}
-					}
-				},
-				{
-					"name": "Publicar - Tipo Invalido (error esperado)",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"tipo\": \"TIPO_INEXISTENTE\",\n    \"asunto\": \"test/1\",\n    \"datos\": {}\n}"
-						},
-						"url": {
-							"raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
-							"host": ["{{AZ_EG_PUBLICADOR_URL}}"],
-							"path": ["api", "eventos", "publicar"]
-						}
-					},
-					"response": [
-						{
-							"name": "400 Bad Request - Tipo invalido",
-							"status": "Bad Request",
-							"code": 400,
-							"_postman_previewlanguage": "json",
-							"header": [{"key": "Content-Type", "value": "application/json"}],
-							"body": "{\n    \"error\": \"Tipo de evento no reconocido: 'TIPO_INEXISTENTE'. Valores permitidos: PRESTAMO_CREADO, LIBRO_DEVUELTO, USUARIO_REGISTRADO\"\n}"
-						}
-					]
-				},
-				{
-					"name": "Publicar - Cuerpo Vacio (error esperado)",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{}"
-						},
-						"url": {
-							"raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
-							"host": ["{{AZ_EG_PUBLICADOR_URL}}"],
-							"path": ["api", "eventos", "publicar"]
-						}
-					},
-					"response": [
-						{
-							"name": "400 Bad Request - Campos obligatorios",
-							"status": "Bad Request",
-							"code": 400,
-							"_postman_previewlanguage": "json",
-							"header": [{"key": "Content-Type", "value": "application/json"}],
-							"body": "{\n    \"error\": \"Los campos 'tipo' y 'asunto' son obligatorios. Tipos validos: PRESTAMO_CREADO, LIBRO_DEVUELTO, USUARIO_REGISTRADO\"\n}"
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "Event Grid - Suscriptor / Log",
-			"description": "Consulta el historial de eventos recibidos desde Azure Event Grid y procesados por la función suscriptora.\nCada evento publicado por el publicador llega aqui luego de ser enrutado por Event Grid.\n\nUsa {{AZ_EG_SUSCRIPTOR_URL}} en Azure o {{EG_SUSCRIPTOR_LOCAL}} en Docker local.",
-			"item": [
-				{
-					"name": "Ver Todos los Eventos Recibidos",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log",
-							"host": ["{{AZ_EG_SUSCRIPTOR_URL}}"],
-							"path": ["api", "eventos", "log"]
-						}
-					},
-					"response": [
-						{
-							"name": "200 OK - Lista de eventos",
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [{"key": "Content-Type", "value": "application/json"}],
-							"body": "[\n    {\n        \"idEvento\": 2,\n        \"tipoEvento\": \"biblioteca.prestamo.devuelto\",\n        \"asunto\": \"prestamos/1\",\n        \"datos\": \"{\\\"idPrestamo\\\":\\\"1\\\",\\\"tituloLibro\\\":\\\"Cien Anos de Soledad\\\",\\\"fechaDevolucion\\\":\\\"2026-05-03\\\"}\",\n        \"fechaRecibido\": \"2026-05-03\"\n    },\n    {\n        \"idEvento\": 1,\n        \"tipoEvento\": \"biblioteca.prestamo.creado\",\n        \"asunto\": \"prestamos/1\",\n        \"datos\": \"{\\\"idPrestamo\\\":\\\"1\\\",\\\"idUsuario\\\":\\\"1\\\",\\\"idLibro\\\":\\\"2\\\",\\\"tituloLibro\\\":\\\"Cien Anos de Soledad\\\"}\",\n        \"fechaRecibido\": \"2026-05-03\"\n    }\n]"
-						}
-					]
-				},
-				{
-					"name": "Ver Eventos Filtrados por Tipo - Prestamo Creado",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log?tipo=biblioteca.prestamo.creado",
-							"host": ["{{AZ_EG_SUSCRIPTOR_URL}}"],
-							"path": ["api", "eventos", "log"],
-							"query": [
-								{
-									"key": "tipo",
-									"value": "biblioteca.prestamo.creado"
-								}
-							]
-						}
-					}
-				},
-				{
-					"name": "Ver Eventos Filtrados por Tipo - Libro Devuelto",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log?tipo=biblioteca.prestamo.devuelto",
-							"host": ["{{AZ_EG_SUSCRIPTOR_URL}}"],
-							"path": ["api", "eventos", "log"],
-							"query": [
-								{
-									"key": "tipo",
-									"value": "biblioteca.prestamo.devuelto"
-								}
-							]
-						}
-					}
-				},
-				{
-					"name": "Ver Eventos Filtrados por Tipo - Usuario Registrado",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log?tipo=biblioteca.usuario.registrado",
-							"host": ["{{AZ_EG_SUSCRIPTOR_URL}}"],
-							"path": ["api", "eventos", "log"],
-							"query": [
-								{
-									"key": "tipo",
-									"value": "biblioteca.usuario.registrado"
-								}
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "Azure Fn - REST Directas",
-			"item": [
-				{
-					"name": "Obtener Usuarios (directo)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{AZ_USUARIOS_URL}}/api/usuarios",
-							"host": ["{{AZ_USUARIOS_URL}}"],
-							"path": ["api", "usuarios"]
-						}
-					}
-				},
-				{
-					"name": "Crear Usuario (directo)",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Content-Type", "value": "application/json"}],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"nombre\": \"Pedro Soto\",\n    \"email\": \"pedro.soto@duocuc.cl\"\n}"
-						},
-						"url": {
-							"raw": "{{AZ_USUARIOS_URL}}/api/usuarios",
-							"host": ["{{AZ_USUARIOS_URL}}"],
-							"path": ["api", "usuarios"]
-						}
-					}
-				},
-				{
-					"name": "Obtener Libros (directo)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{AZ_PRESTAMOS_URL}}/api/libros",
-							"host": ["{{AZ_PRESTAMOS_URL}}"],
-							"path": ["api", "libros"]
-						}
-					}
-				},
-				{
-					"name": "Obtener Prestamos (directo)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{AZ_PRESTAMOS_URL}}/api/prestamos",
-							"host": ["{{AZ_PRESTAMOS_URL}}"],
-							"path": ["api", "prestamos"]
-						}
-					}
-				}
-			]
-		}
-	]
+  "info": {
+    "_postman_id": "fec6b3a1-a86a-4949-8917-95b584bd03f3",
+    "name": "Sistema Biblioteca DuocUC",
+    "description": "Coleccion completa: BFF REST, Azure Functions REST, GraphQL y Event Grid.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "2698314"
+  },
+  "item": [
+    {
+      "name": "BFF - Usuarios",
+      "item": [
+        {
+          "name": "Listar Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BFF_URL}}/api/bff/usuarios",
+              "host": [
+                "{{BFF_URL}}"
+              ],
+              "path": [
+                "api",
+                "bff",
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BFF_URL}}/api/bff/usuarios/1",
+              "host": [
+                "{{BFF_URL}}"
+              ],
+              "path": [
+                "api",
+                "bff",
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Maria Lopez\",\n    \"email\": \"maria.lopez@duocuc.cl\"\n}"
+            },
+            "url": {
+              "raw": "{{BFF_URL}}/api/bff/usuarios",
+              "host": [
+                "{{BFF_URL}}"
+              ],
+              "path": [
+                "api",
+                "bff",
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BFF_URL}}/api/bff/usuarios/1",
+              "host": [
+                "{{BFF_URL}}"
+              ],
+              "path": [
+                "api",
+                "bff",
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "BFF - Libros",
+      "item": [
+        {
+          "name": "Listar Libros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BFF_URL}}/api/bff/libros",
+              "host": [
+                "{{BFF_URL}}"
+              ],
+              "path": [
+                "api",
+                "bff",
+                "libros"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Libro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"titulo\": \"La Casa de los Espiritus\",\n    \"autor\": \"Isabel Allende\"\n}"
+            },
+            "url": {
+              "raw": "{{BFF_URL}}/api/bff/libros",
+              "host": [
+                "{{BFF_URL}}"
+              ],
+              "path": [
+                "api",
+                "bff",
+                "libros"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "BFF - Prestamos",
+      "item": [
+        {
+          "name": "Listar Prestamos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BFF_URL}}/api/bff/prestamos",
+              "host": [
+                "{{BFF_URL}}"
+              ],
+              "path": [
+                "api",
+                "bff",
+                "prestamos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Prestamo por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BFF_URL}}/api/bff/prestamos/1",
+              "host": [
+                "{{BFF_URL}}"
+              ],
+              "path": [
+                "api",
+                "bff",
+                "prestamos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Prestamo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"idUsuario\": 1,\n    \"idLibro\": 1\n}"
+            },
+            "url": {
+              "raw": "{{BFF_URL}}/api/bff/prestamos",
+              "host": [
+                "{{BFF_URL}}"
+              ],
+              "path": [
+                "api",
+                "bff",
+                "prestamos"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "GraphQL - Consultas (Queries)",
+      "item": [
+        {
+          "name": "Todos los Usuarios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"{ usuarios { idUsuario nombre email fechaRegistro } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+              "host": [
+                "{{AZ_GQL_CONSULTAS_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "consultas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Usuario con sus Prestamos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"{ usuario(id: 1) { idUsuario nombre email prestamos { idPrestamo tituloLibro fechaPrestamo estado } } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+              "host": [
+                "{{AZ_GQL_CONSULTAS_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "consultas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Todos los Libros con Categoria y Resenas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"{ libros { idLibro titulo autor disponible categoria { nombre } resenas { calificacion comentario nombreUsuario } } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+              "host": [
+                "{{AZ_GQL_CONSULTAS_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "consultas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Libro por ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"{ libro(id: 1) { idLibro titulo autor disponible categoria { nombre descripcion } resenas { nombreUsuario calificacion comentario fecha } } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+              "host": [
+                "{{AZ_GQL_CONSULTAS_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "consultas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Todas las Categorias",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"{ categorias { idCategoria nombre descripcion } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+              "host": [
+                "{{AZ_GQL_CONSULTAS_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "consultas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Libros por Categoria",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"{ librosPorCategoria(idCategoria: 1) { idLibro titulo autor disponible } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+              "host": [
+                "{{AZ_GQL_CONSULTAS_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "consultas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prestamos por Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"{ prestamosPorUsuario(idUsuario: 1) { idPrestamo tituloLibro fechaPrestamo fechaDevolucion estado } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+              "host": [
+                "{{AZ_GQL_CONSULTAS_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "consultas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resenas por Libro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"{ resenasPorLibro(idLibro: 1) { idResena nombreUsuario calificacion comentario fecha } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_CONSULTAS_URL}}/api/graphql/consultas",
+              "host": [
+                "{{AZ_GQL_CONSULTAS_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "consultas"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Consultas complejas via GraphQL. Endpoint: POST /api/graphql/consultas"
+    },
+    {
+      "name": "GraphQL - Operaciones (Mutations)",
+      "item": [
+        {
+          "name": "Crear Categoria",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"mutation { crearCategoria(nombre: \\\"Ciencia Ficcion\\\", descripcion: \\\"Obras de ciencia ficcion y fantasia\\\") { idCategoria nombre descripcion } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
+              "host": [
+                "{{AZ_GQL_OPERACIONES_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "operaciones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Asignar Categoria a Libro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"mutation { asignarCategoria(idLibro: 1, idCategoria: 1) { idLibro titulo autor } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
+              "host": [
+                "{{AZ_GQL_OPERACIONES_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "operaciones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Resena",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"mutation { crearResena(idUsuario: 1, idLibro: 1, calificacion: 5, comentario: \\\"Excelente lectura\\\") { idResena calificacion comentario fecha } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
+              "host": [
+                "{{AZ_GQL_OPERACIONES_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "operaciones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Devolver Libro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"query\": \"mutation { devolverLibro(idPrestamo: 1) { idPrestamo estado fechaDevolucion } }\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_GQL_OPERACIONES_URL}}/api/graphql/operaciones",
+              "host": [
+                "{{AZ_GQL_OPERACIONES_URL}}"
+              ],
+              "path": [
+                "api",
+                "graphql",
+                "operaciones"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Mutaciones via GraphQL. Endpoint: POST /api/graphql/operaciones"
+    },
+    {
+      "name": "Event Grid - Publicador",
+      "item": [
+        {
+          "name": "Publicar - Prestamo Creado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tipo\": \"PRESTAMO_CREADO\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"nombreUsuario\": \"Sebastian Cortes\",\n        \"tituloLibro\": \"Cien Anos de Soledad\"\n    }\n}"
+            },
+            "url": {
+              "raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+              "host": [
+                "{{AZ_EG_PUBLICADOR_URL}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "publicar"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Evento publicado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"tipo\": \"PRESTAMO_CREADO\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"nombreUsuario\": \"Sebastian Cortes\",\n        \"tituloLibro\": \"Cien Anos de Soledad\"\n    }\n}"
+                },
+                "url": {
+                  "raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+                  "host": [
+                    "{{AZ_EG_PUBLICADOR_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "eventos",
+                    "publicar"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"mensaje\": \"Evento publicado correctamente en Azure Event Grid\",\n    \"idEvento\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n    \"tipoEvento\": \"biblioteca.prestamo.creado\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"nombreUsuario\": \"Sebastian Cortes\",\n        \"tituloLibro\": \"Cien Anos de Soledad\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Publicar - Libro Devuelto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tipo\": \"LIBRO_DEVUELTO\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"tituloLibro\": \"Cien Anos de Soledad\",\n        \"fechaDevolucion\": \"2026-05-03\"\n    }\n}"
+            },
+            "url": {
+              "raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+              "host": [
+                "{{AZ_EG_PUBLICADOR_URL}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "publicar"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Evento publicado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"tipo\": \"LIBRO_DEVUELTO\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idUsuario\": \"1\",\n        \"idLibro\": \"2\",\n        \"tituloLibro\": \"Cien Anos de Soledad\",\n        \"fechaDevolucion\": \"2026-05-03\"\n    }\n}"
+                },
+                "url": {
+                  "raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+                  "host": [
+                    "{{AZ_EG_PUBLICADOR_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "eventos",
+                    "publicar"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"mensaje\": \"Evento publicado correctamente en Azure Event Grid\",\n    \"idEvento\": \"b2c3d4e5-f6a7-8901-bcde-f12345678901\",\n    \"tipoEvento\": \"biblioteca.prestamo.devuelto\",\n    \"asunto\": \"prestamos/1\",\n    \"datos\": {\n        \"idPrestamo\": \"1\",\n        \"idLibro\": \"2\",\n        \"fechaDevolucion\": \"2026-05-03\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Publicar - Usuario Registrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tipo\": \"USUARIO_REGISTRADO\",\n    \"asunto\": \"usuarios/3\",\n    \"datos\": {\n        \"idUsuario\": \"3\",\n        \"nombre\": \"Carlos Mendoza\",\n        \"email\": \"carlos.mendoza@duocuc.cl\"\n    }\n}"
+            },
+            "url": {
+              "raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+              "host": [
+                "{{AZ_EG_PUBLICADOR_URL}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "publicar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publicar - Usuario Eliminado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tipo\": \"USUARIO_ELIMINADO\",\n    \"asunto\": \"usuarios/1\",\n    \"datos\": {\n        \"idUsuario\": \"1\"\n    }\n}"
+            },
+            "url": {
+              "raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+              "host": [
+                "{{AZ_EG_PUBLICADOR_URL}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "publicar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Publicar - Tipo Invalido (error esperado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tipo\": \"TIPO_INEXISTENTE\",\n    \"asunto\": \"test/1\",\n    \"datos\": {}\n}"
+            },
+            "url": {
+              "raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+              "host": [
+                "{{AZ_EG_PUBLICADOR_URL}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "publicar"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "400 Bad Request - Tipo invalido",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"tipo\": \"TIPO_INEXISTENTE\",\n    \"asunto\": \"test/1\",\n    \"datos\": {}\n}"
+                },
+                "url": {
+                  "raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+                  "host": [
+                    "{{AZ_EG_PUBLICADOR_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "eventos",
+                    "publicar"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"error\": \"Tipo de evento no reconocido: 'TIPO_INEXISTENTE'. Valores permitidos: PRESTAMO_CREADO, LIBRO_DEVUELTO, USUARIO_REGISTRADO\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Publicar - Cuerpo Vacio (error esperado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+              "host": [
+                "{{AZ_EG_PUBLICADOR_URL}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "publicar"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "400 Bad Request - Campos obligatorios",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "{{AZ_EG_PUBLICADOR_URL}}/api/eventos/publicar",
+                  "host": [
+                    "{{AZ_EG_PUBLICADOR_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "eventos",
+                    "publicar"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"error\": \"Los campos 'tipo' y 'asunto' son obligatorios. Tipos validos: PRESTAMO_CREADO, LIBRO_DEVUELTO, USUARIO_REGISTRADO\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Publica eventos al Custom Topic de Azure Event Grid.\nUsa {{AZ_EG_PUBLICADOR_URL}} en Azure o {{EG_PUBLICADOR_LOCAL}} en Docker local.\n\nFlujo: este endpoint actúa como generador de eventos. Azure Event Grid enruta cada evento al suscriptor registrado (function-eventgrid-suscriptor), que lo persiste en la tabla eventos_log de Oracle."
+    },
+    {
+      "name": "Event Grid - Suscriptor / Log",
+      "item": [
+        {
+          "name": "Ver Todos los Eventos Recibidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log",
+              "host": [
+                "{{AZ_EG_SUSCRIPTOR_URL}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "log"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Lista de eventos",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log",
+                  "host": [
+                    "{{AZ_EG_SUSCRIPTOR_URL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "eventos",
+                    "log"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n    {\n        \"idEvento\": 2,\n        \"tipoEvento\": \"biblioteca.prestamo.devuelto\",\n        \"asunto\": \"prestamos/1\",\n        \"datos\": \"{\\\"idPrestamo\\\":\\\"1\\\",\\\"tituloLibro\\\":\\\"Cien Anos de Soledad\\\",\\\"fechaDevolucion\\\":\\\"2026-05-03\\\"}\",\n        \"fechaRecibido\": \"2026-05-03\"\n    },\n    {\n        \"idEvento\": 1,\n        \"tipoEvento\": \"biblioteca.prestamo.creado\",\n        \"asunto\": \"prestamos/1\",\n        \"datos\": \"{\\\"idPrestamo\\\":\\\"1\\\",\\\"idUsuario\\\":\\\"1\\\",\\\"idLibro\\\":\\\"2\\\",\\\"tituloLibro\\\":\\\"Cien Anos de Soledad\\\"}\",\n        \"fechaRecibido\": \"2026-05-03\"\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Ver Eventos Filtrados por Tipo - Prestamo Creado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log?tipo=biblioteca.prestamo.creado",
+              "host": [
+                "{{AZ_EG_SUSCRIPTOR_URL}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "log"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "biblioteca.prestamo.creado"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver Eventos Filtrados por Tipo - Libro Devuelto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log?tipo=biblioteca.prestamo.devuelto",
+              "host": [
+                "{{AZ_EG_SUSCRIPTOR_URL}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "log"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "biblioteca.prestamo.devuelto"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver Eventos Filtrados por Tipo - Usuario Registrado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{AZ_EG_SUSCRIPTOR_URL}}/api/eventos/log?tipo=biblioteca.usuario.registrado",
+              "host": [
+                "{{AZ_EG_SUSCRIPTOR_URL}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "log"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "biblioteca.usuario.registrado"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Consulta el historial de eventos recibidos desde Azure Event Grid y procesados por la función suscriptora.\nCada evento publicado por el publicador llega aqui luego de ser enrutado por Event Grid.\n\nUsa {{AZ_EG_SUSCRIPTOR_URL}} en Azure o {{EG_SUSCRIPTOR_LOCAL}} en Docker local."
+    },
+    {
+      "name": "Azure Fn - REST Directas",
+      "item": [
+        {
+          "name": "Obtener Usuarios (directo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{AZ_USUARIOS_URL}}/api/usuarios",
+              "host": [
+                "{{AZ_USUARIOS_URL}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Usuario (directo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Pedro Soto\",\n    \"email\": \"pedro.soto@duocuc.cl\"\n}"
+            },
+            "url": {
+              "raw": "{{AZ_USUARIOS_URL}}/api/usuarios",
+              "host": [
+                "{{AZ_USUARIOS_URL}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Usuario por ID (directo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{AZ_USUARIOS_URL}}/api/usuarios/1",
+              "host": [
+                "{{AZ_USUARIOS_URL}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar Usuario (directo)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{AZ_USUARIOS_URL}}/api/usuarios/1",
+              "host": [
+                "{{AZ_USUARIOS_URL}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Libros (directo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{AZ_PRESTAMOS_URL}}/api/libros",
+              "host": [
+                "{{AZ_PRESTAMOS_URL}}"
+              ],
+              "path": [
+                "api",
+                "libros"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Prestamos (directo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{AZ_PRESTAMOS_URL}}/api/prestamos",
+              "host": [
+                "{{AZ_PRESTAMOS_URL}}"
+              ],
+              "path": [
+                "api",
+                "prestamos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Prestamo por ID (directo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{AZ_PRESTAMOS_URL}}/api/prestamos/1",
+              "host": [
+                "{{AZ_PRESTAMOS_URL}}"
+              ],
+              "path": [
+                "api",
+                "prestamos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "BFF_URL",
+      "value": "http://44.233.50.94:8080",
+      "description": "IP Elastica EC2 - BFF Spring Boot"
+    },
+    {
+      "key": "AZ_USUARIOS_URL",
+      "value": "https://biblio-users-g11.azurewebsites.net",
+      "description": "Azure Function App - Usuarios"
+    },
+    {
+      "key": "AZ_PRESTAMOS_URL",
+      "value": "https://biblio-prestamos-g11.azurewebsites.net",
+      "description": "Azure Function App - Prestamos y Libros"
+    },
+    {
+      "key": "AZ_GQL_CONSULTAS_URL",
+      "value": "http://localhost:8081",
+      "description": "GraphQL Consultas - Docker local (puerto 8081)"
+    },
+    {
+      "key": "AZ_GQL_OPERACIONES_URL",
+      "value": "http://localhost:8082",
+      "description": "GraphQL Operaciones - Docker local (puerto 8082)"
+    },
+    {
+      "key": "AZ_EG_PUBLICADOR_URL",
+      "value": "https://biblio-eg-publicador-g11.azurewebsites.net",
+      "description": "Event Grid Publicador - Azure (produccion)"
+    },
+    {
+      "key": "AZ_EG_SUSCRIPTOR_URL",
+      "value": "https://biblio-eg-suscriptor-g11.azurewebsites.net",
+      "description": "Event Grid Suscriptor - Azure (produccion)"
+    },
+    {
+      "key": "EG_PUBLICADOR_LOCAL",
+      "value": "http://localhost:8083",
+      "description": "Event Grid Publicador - Docker local (puerto 8083)"
+    },
+    {
+      "key": "EG_SUSCRIPTOR_LOCAL",
+      "value": "http://localhost:8084",
+      "description": "Event Grid Suscriptor - Docker local (puerto 8084)"
+    }
+  ]
 }

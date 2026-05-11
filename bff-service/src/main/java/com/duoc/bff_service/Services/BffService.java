@@ -25,6 +25,10 @@ public class BffService {
         return restTemplate.getForObject(usuariosUrl, Object.class);
     }
 
+    public Object getUsuarioPorId(int id) {
+        return restTemplate.getForObject(usuariosUrl + "/" + id, Object.class);
+    }
+
     public Object crearUsuario(Object body) {
         return restTemplate.postForObject(usuariosUrl, body, Object.class);
     }
@@ -43,6 +47,10 @@ public class BffService {
     // --- Prestamos ---
     public Object getPrestamos() {
         return restTemplate.getForObject(prestamosUrl, Object.class);
+    }
+
+    public Object getPrestamoPorId(int id) {
+        return restTemplate.getForObject(prestamosUrl + "/" + id, Object.class);
     }
 
     public Object crearPrestamo(Object body) {
