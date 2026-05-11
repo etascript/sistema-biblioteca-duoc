@@ -1,2 +1,3 @@
 com\function\DatabaseHelper.class
 com\function\UsuarioFunction.class
+com\function\EventPublisher.class

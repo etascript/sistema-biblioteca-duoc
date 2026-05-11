@@ -3,7 +3,7 @@
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=false",
     "FUNCTIONS_WORKER_RUNTIME": "java",
-    "EVENT_GRID_TOPIC_ENDPOINT": "https://grupo11cloud.eastus-1.eventgrid.azure.net/api/events",
-    "EVENT_GRID_TOPIC_KEY": "CCNXIRRlxs78iPb2IlfxNJOKrkx81oNJWkPlm3dHpZTjnZa4yPbjJQQJ99CEACYeBjFXJ3w3AAABAZEGezGF"
+    "EVENT_GRID_TOPIC_ENDPOINT": "",
+    "EVENT_GRID_TOPIC_KEY": ""
   }
 }

@@ -14,7 +14,7 @@
         <java.version>21</java.version>
         <azure.functions.maven.plugin.version>1.40.0</azure.functions.maven.plugin.version>
         <azure.functions.java.library.version>3.2.2</azure.functions.java.library.version>
-        <functionAppName>biblio-graphql-operaciones-g11</functionAppName>
+        <functionAppName>f-graphql-operaciones</functionAppName>
     </properties>
 
     <dependencies>

@@ -1,0 +1,16 @@
+{
+  "scriptFile" : "../function-graphql-operaciones-1.0-SNAPSHOT.jar",
+  "entryPoint" : "com.function.GraphQLOperacionesFunction.execute",
+  "bindings" : [ {
+    "type" : "httpTrigger",
+    "direction" : "in",
+    "name" : "req",
+    "route" : "graphql/operaciones",
+    "methods" : [ "POST" ],
+    "authLevel" : "ANONYMOUS"
+  }, {
+    "type" : "http",
+    "direction" : "out",
+    "name" : "$return"
+  } ]
+}

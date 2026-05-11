@@ -1,3 +1,4 @@
+com\function\PrestamoFunction.class
+com\function\EventPublisher.class
 com\function\DatabaseHelper.class
 com\function\LibroFunction.class
-com\function\PrestamoFunction.class

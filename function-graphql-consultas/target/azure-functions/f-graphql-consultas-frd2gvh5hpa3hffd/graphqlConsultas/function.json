@@ -1,0 +1,16 @@
+{
+  "scriptFile" : "../function-graphql-consultas-1.0-SNAPSHOT.jar",
+  "entryPoint" : "com.function.GraphQLConsultasFunction.execute",
+  "bindings" : [ {
+    "type" : "httpTrigger",
+    "direction" : "in",
+    "name" : "req",
+    "route" : "graphql/consultas",
+    "methods" : [ "POST" ],
+    "authLevel" : "ANONYMOUS"
+  }, {
+    "type" : "http",
+    "direction" : "out",
+    "name" : "$return"
+  } ]
+}
