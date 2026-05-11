@@ -118,4 +118,65 @@ public class UsuarioFunction {
                     .build();
         }
     }
+
+    @FunctionName("eliminarUsuario")
+    public HttpResponseMessage eliminarUsuario(
+            @HttpTrigger(
+                name = "req",
+                methods = {HttpMethod.DELETE},
+                authLevel = AuthorizationLevel.ANONYMOUS,
+                route = "usuarios/{id}"
+            ) HttpRequestMessage<Optional<String>> request,
+            @BindingName("id") String id,
+            final ExecutionContext context) {
+
+        context.getLogger().info("DELETE /api/usuarios/" + id + " - Eliminando usuario...");
+
+        int idUsuario;
+        try {
+            idUsuario = Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST)
+                    .header("Content-Type", "application/json")
+                    .body("{\"error\": \"ID de usuario invalido\"}").build();
+        }
+
+        try (Connection conn = DatabaseHelper.getConnection()) {
+
+            PreparedStatement check = conn.prepareStatement(
+                "SELECT id_usuario FROM usuarios WHERE id_usuario = ?");
+            check.setInt(1, idUsuario);
+            if (!check.executeQuery().next()) {
+                return request.createResponseBuilder(HttpStatus.NOT_FOUND)
+                        .header("Content-Type", "application/json")
+                        .body("{\"error\": \"Usuario no encontrado\"}").build();
+            }
+
+            PreparedStatement ps = conn.prepareStatement(
+                "DELETE FROM usuarios WHERE id_usuario = ?");
+            ps.setInt(1, idUsuario);
+            ps.executeUpdate();
+
+            Map<String, Object> datosEvento = new HashMap<>();
+            datosEvento.put("idUsuario", String.valueOf(idUsuario));
+            EventPublisher.publicar(
+                "biblioteca.usuario.eliminado",
+                "usuarios/" + idUsuario,
+                datosEvento,
+                context.getLogger()
+            );
+
+            return request.createResponseBuilder(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body("{\"mensaje\": \"Usuario eliminado correctamente\"}")
+                    .build();
+
+        } catch (SQLException e) {
+            context.getLogger().severe("Error de BD: " + e.getMessage());
+            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .header("Content-Type", "application/json")
+                    .body("{\"error\": \"Error al eliminar usuario: " + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
 }

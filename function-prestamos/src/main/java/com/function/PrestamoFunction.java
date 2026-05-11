@@ -91,9 +91,9 @@ public class PrestamoFunction {
 
         try (Connection conn = DatabaseHelper.getConnection()) {
 
-            // Verificar que el libro existe y esta disponible
+            // Verificar que el libro existe y tiene stock
             PreparedStatement checkLibro = conn.prepareStatement(
-                "SELECT disponible FROM libros WHERE id_libro = ?");
+                "SELECT stock FROM libros WHERE id_libro = ?");
             checkLibro.setInt(1, idLibro);
             ResultSet rsLibro = checkLibro.executeQuery();
 
@@ -102,7 +102,7 @@ public class PrestamoFunction {
                         .header("Content-Type", "application/json")
                         .body("{\"error\": \"El libro no existe\"}").build();
             }
-            if (rsLibro.getInt("disponible") == 0) {
+            if (rsLibro.getInt("stock") <= 0) {
                 return request.createResponseBuilder(HttpStatus.CONFLICT)
                         .header("Content-Type", "application/json")
                         .body("{\"error\": \"El libro no esta disponible\"}").build();
@@ -122,11 +122,16 @@ public class PrestamoFunction {
                 newId = keys.getInt(1);
             }
 
-            // Marcar el libro como no disponible
-            PreparedStatement updateLibro = conn.prepareStatement(
-                "UPDATE libros SET disponible = 0 WHERE id_libro = ?");
-            updateLibro.setInt(1, idLibro);
-            updateLibro.executeUpdate();
+            // Publicar evento para que el suscriptor descuente el stock
+            Map<String, Object> datosEvento = new HashMap<>();
+            datosEvento.put("idLibro", String.valueOf(idLibro));
+            datosEvento.put("idPrestamo", String.valueOf(newId));
+            EventPublisher.publicar(
+                "biblioteca.prestamo.creado",
+                "prestamos/" + newId,
+                datosEvento,
+                context.getLogger()
+            );
 
             Map<String, Object> response = new HashMap<>();
             response.put("mensaje", "Prestamo creado correctamente");

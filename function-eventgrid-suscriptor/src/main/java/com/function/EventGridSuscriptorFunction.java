@@ -51,6 +51,12 @@ public class EventGridSuscriptorFunction {
                 datos = dataElement.isJsonNull() ? "" : dataElement.toString();
             }
 
+            switch (tipoEvento) {
+                case "biblioteca.prestamo.creado"   -> procesarPrestamoCreado(eventoJson, context);
+                case "biblioteca.usuario.eliminado" -> procesarUsuarioEliminado(eventoJson, context);
+                default -> context.getLogger().info("Evento sin logica especifica: " + tipoEvento);
+            }
+
             guardarEventoEnDB(idEvento, tipoEvento, asunto, datos, context);
 
             context.getLogger().info("Evento procesado correctamente: tipo=" + tipoEvento
@@ -116,6 +122,57 @@ public class EventGridSuscriptorFunction {
                     .header("Content-Type", "application/json")
                     .body("{\"error\": \"Error al consultar eventos_log: " + e.getMessage() + "\"}")
                     .build();
+        }
+    }
+
+    private void procesarPrestamoCreado(JsonObject eventoJson, ExecutionContext context) {
+        JsonObject data = eventoJson.getAsJsonObject("data");
+        if (data == null || !data.has("idLibro")) {
+            context.getLogger().warning("PRESTAMO_CREADO sin idLibro en data, omitiendo.");
+            return;
+        }
+        int idLibro = Integer.parseInt(data.get("idLibro").getAsString());
+
+        String sql = "UPDATE libros SET stock = stock - 1, " +
+                     "disponible = CASE WHEN stock - 1 <= 0 THEN 0 ELSE 1 END " +
+                     "WHERE id_libro = ? AND stock > 0";
+
+        try (Connection conn = DatabaseHelper.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idLibro);
+            int rows = ps.executeUpdate();
+            context.getLogger().info("Stock decrementado para libro " + idLibro + " (" + rows + " fila/s)");
+        } catch (SQLException e) {
+            context.getLogger().severe("Error al decrementar stock: " + e.getMessage());
+            throw new RuntimeException("Error al procesar PRESTAMO_CREADO", e);
+        }
+    }
+
+    private void procesarUsuarioEliminado(JsonObject eventoJson, ExecutionContext context) {
+        JsonObject data = eventoJson.getAsJsonObject("data");
+        if (data == null || !data.has("idUsuario")) {
+            context.getLogger().warning("USUARIO_ELIMINADO sin idUsuario en data, omitiendo.");
+            return;
+        }
+        int idUsuario = Integer.parseInt(data.get("idUsuario").getAsString());
+
+        String restoreStock = "UPDATE libros SET stock = stock + 1, disponible = 1 " +
+                              "WHERE id_libro IN (" +
+                              "  SELECT id_libro FROM prestamos WHERE id_usuario = ? AND estado = 'ACTIVO')";
+        String deletePrestamos = "DELETE FROM prestamos WHERE id_usuario = ?";
+
+        try (Connection conn = DatabaseHelper.getConnection()) {
+            PreparedStatement ps1 = conn.prepareStatement(restoreStock);
+            ps1.setInt(1, idUsuario);
+            ps1.executeUpdate();
+
+            PreparedStatement ps2 = conn.prepareStatement(deletePrestamos);
+            ps2.setInt(1, idUsuario);
+            int deleted = ps2.executeUpdate();
+            context.getLogger().info("Prestamos eliminados para usuario " + idUsuario + ": " + deleted);
+        } catch (SQLException e) {
+            context.getLogger().severe("Error al limpiar prestamos: " + e.getMessage());
+            throw new RuntimeException("Error al procesar USUARIO_ELIMINADO", e);
         }
     }
 

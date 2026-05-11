@@ -122,6 +122,7 @@ public class EventGridPublicadorFunction {
             case "PRESTAMO_CREADO"    -> "biblioteca.prestamo.creado";
             case "LIBRO_DEVUELTO"     -> "biblioteca.prestamo.devuelto";
             case "USUARIO_REGISTRADO" -> "biblioteca.usuario.registrado";
+            case "USUARIO_ELIMINADO"  -> "biblioteca.usuario.eliminado";
             default -> null;
         };
     }
